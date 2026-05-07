@@ -8,8 +8,8 @@
     {
       "name": "guard-rails-boilerplate",
       "source": {
-        "source": "git",
-        "url": "https://github.com/dcassil/agent-architecture-plugin.git"
+        "source": "github",
+        "repo": "dcassil/agent-architecture-plugin"
       },
       "description": "Architecture catalog: Next.js + Vercel, Node API, Supabase — each with ESLint/TS guard rails enforcing layer boundaries, no cross-feature imports, file/complexity caps."
     }
