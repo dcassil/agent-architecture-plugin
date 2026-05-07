@@ -14,6 +14,7 @@ This project is a **catalog of TypeScript architecture patterns**. Each pattern 
 | `react-next-vercel-webapp` | Vercel-hosted product webapp; UI + thin BFF in one repo | `arch-next-vercel` |
 | `node-api` | Standalone backend service with real domain logic, layered (routes → handlers → services → repos) | `arch-node-api` |
 | `supabase-api` | Data-access-dominant app; Postgres + RLS as the API; Edge Functions for the rest | `arch-supabase-api` |
+| `supabase-node-rag` | Next.js + Supabase + pgvector RAG backend; Route Handler orchestrates retrieval + generation | `arch-supabase-node-rag` |
 
 Patterns live under `architectures/<name>/` in this repo.
 
@@ -31,6 +32,7 @@ Patterns live under `architectures/<name>/` in this repo.
 1. Pure frontend / marketing + app on Vercel → **arch-next-vercel**.
 2. Backend with non-trivial domain logic, deployable to container/Lambda → **arch-node-api**.
 3. CRUD-heavy app where authorization fits as RLS policy → **arch-supabase-api**.
+4. RAG app on Next.js with Postgres + pgvector as the vector store → **arch-supabase-node-rag**.
 
 If unsure, ask the user about: hosting target, where domain logic lives, and whether they need a separate backend.
 

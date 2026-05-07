@@ -14,8 +14,9 @@ Steps:
    - `react-next-vercel-webapp` (or `next`, `nextjs`, `vercel`)
    - `node-api` (or `node`, `api`)
    - `supabase-api` (or `supabase`)
+   - `supabase-node-rag` (or `rag`, `pgvector`, `supabase-rag`)
 
-   If `$1` is empty or unrecognized, list the three options and ask which one. Do not guess.
+   If `$1` is empty or unrecognized, list the four options and ask which one. Do not guess.
 
 2. Locate the source. The catalog lives at the root of this repo under `architectures/<pattern>/`. If you can't find it relative to the current working directory, ask the user for the path to the `gaurd-rails-boilerplate` repo.
 
@@ -27,6 +28,6 @@ Steps:
 
 6. Tell the user what to customize (path globs in `no-restricted-imports`, package name aliases, `paths` in tsconfig).
 
-7. Recommend invoking the matching skill (`arch-next-vercel`, `arch-node-api`, or `arch-supabase-api`) for the full rules reference.
+7. Recommend invoking the matching skill (`arch-next-vercel`, `arch-node-api`, `arch-supabase-api`, or `arch-supabase-node-rag`) for the full rules reference.
 
 Be terse. Show diffs before writing. Confirm before any destructive action.

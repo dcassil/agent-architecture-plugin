@@ -8,7 +8,7 @@
     {
       "name": "guard-rails-boilerplate",
       "source": "./",
-      "description": "Architecture catalog: Next.js + Vercel, Node API, Supabase — each with ESLint/TS guard rails enforcing layer boundaries, no cross-feature imports, file/complexity caps."
+      "description": "Architecture catalog: Next.js + Vercel, Node API, Supabase, and Supabase RAG (pgvector) — each with ESLint/TS guard rails enforcing layer boundaries, no cross-feature imports, file/complexity caps."
     }
   ]
 }
