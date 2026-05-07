@@ -30,4 +30,6 @@ Steps:
 
 7. Recommend invoking the matching skill (`arch-next-vercel`, `arch-node-api`, `arch-supabase-api`, or `arch-supabase-node-rag`) for the full rules reference.
 
+8. Invoke the `universal-guard-rails` skill to offer the two architecture-agnostic additions (fail-fast build + pre-commit gate; agent guardrail against lint/type-rule loosening). Ask both questions; apply only what the user accepts.
+
 Be terse. Show diffs before writing. Confirm before any destructive action.

@@ -40,6 +40,15 @@ If unsure, ask the user about: hosting target, where domain logic lives, and whe
 
 Use the `/scaffold-architecture` command, or invoke the architecture-specific skill which contains exact copy steps and peer-dep install commands.
 
+## Universal additions (after architecture is chosen)
+
+The `universal-guard-rails` skill offers two architecture-agnostic additions and applies whichever the user accepts:
+
+1. **Fail-fast feedback** — wire `tsc --noEmit` + `eslint` into build (fail-on-error) and pre-commit, plus a CI job. Fast loops are how AI iteration stays efficient.
+2. **Agent guardrail** — `AGENTS.md` rule forbidding agents from loosening lint/TS rules (disabling rules, lowering strictness, `// eslint-disable`, `any`, `@ts-ignore`, etc.) without per-instance human approval. Stops the "relax instead of fix" failure mode.
+
+`/scaffold-architecture` invokes this skill automatically after copying the per-architecture configs.
+
 ## Adding a new pattern
 
 Each entry follows the Cadre `architecture_catalog_entry` format: Overview, Structure, Dependency Rules, Naming Conventions, Anti-Patterns, Quality Expectations, Rules Seed Data. New patterns must ship `eslint.config.mjs` + `tsconfig.json` matching the spec.
