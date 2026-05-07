@@ -1,6 +1,6 @@
 {
   "name": "guard-rails-boilerplate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Architecture pattern catalog with strict ESLint + TypeScript guard rails for Next.js, Node API, and Supabase projects.",
   "author": {
     "name": "Daniel Cassil",
