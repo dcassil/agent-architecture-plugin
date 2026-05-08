@@ -1,6 +1,6 @@
 {
   "name": "dev-genie",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Dev-genie umbrella plugin: bootstraps the ecosystem via /dev-genie-init, detects project state, and orchestrates installation of guardrails (architecture + lint rules) and audit (scoring + pre-commit). Scope is onboarding and orchestration only — does not own architecture rules or static-analysis scoring itself.",
   "author": {
     "name": "Daniel Cassil",

@@ -14,6 +14,7 @@
  *     repoPath,          // string, required (absolute repo path)
  *     detected?,         // optional pre-computed detect-config.js report
  *     resolvedEslint?,   // optional pre-computed eslint-effective-config result
+ *     resolvedTsconfig?, // optional pre-computed tsconfig-effective-config result
  *     baseline?,         // optional pre-loaded arch baseline JSON
  *     universal?,        // optional pre-loaded universal baseline JSON
  *     buildCI?,          // optional pre-computed detect-build-ci.js report
@@ -44,6 +45,7 @@
 const path = require('node:path');
 const { detectConfig } = require('../skills/project-detection/detect-config.js');
 const { resolveEslintConfig } = require('./eslint-effective-config.js');
+const { resolveTsconfig } = require('./tsconfig-effective-config.js');
 const { detectBuildCI } = require('../skills/project-detection/detect-build-ci.js');
 
 // --- baseline loader (baselines/index.mjs is ESM; bridge via dynamic import) ---
@@ -212,26 +214,12 @@ function describeLevel(level) {
   return 'unset';
 }
 
-function compareTsconfig(baseline, repoPath) {
+function compareTsconfig(baseline, repoPath, resolvedTsconfig) {
   const findings = [];
   const expected =
     (baseline.tsconfig && baseline.tsconfig.compilerOptions) || {};
-  // Read user tsconfig (best-effort; we don't follow extends here — that's a
-  // future enhancement. Strict flags are usually set directly anyway.)
-  const fs = require('node:fs');
-  let userOpts = {};
-  try {
-    const raw = fs.readFileSync(path.join(repoPath, 'tsconfig.json'), 'utf8');
-    // Strip JSONC comments + trailing commas (very lightweight).
-    const stripped = raw
-      .replace(/\/\*[\s\S]*?\*\//g, '')
-      .replace(/(^|[^:"'])\/\/.*$/gm, '$1')
-      .replace(/,(\s*[}\]])/g, '$1');
-    const parsed = JSON.parse(stripped);
-    userOpts = parsed.compilerOptions || {};
-  } catch {
-    // No tsconfig (or unparseable) — every baseline option becomes missing.
-  }
+  const resolved = resolvedTsconfig || resolveTsconfig(repoPath);
+  const userOpts = resolved.compilerOptions || {};
 
   for (const [key, baselineVal] of Object.entries(expected)) {
     const has = Object.prototype.hasOwnProperty.call(userOpts, key);
@@ -451,12 +439,13 @@ async function compareConfig(opts) {
 
   const detected = opts.detected || detectConfig(repoPath);
   const resolvedEslint = opts.resolvedEslint || resolveEslintConfig(repoPath);
+  const resolvedTsconfig = opts.resolvedTsconfig || resolveTsconfig(repoPath);
   const buildCI = opts.buildCI || detectBuildCI(repoPath);
   const { baseline, universal } = await loadBaselines(archId, opts.baseline, opts.universal);
 
   const findings = [
     ...compareEslint(baseline, resolvedEslint),
-    ...compareTsconfig(baseline, repoPath),
+    ...compareTsconfig(baseline, repoPath, resolvedTsconfig),
     ...compareScripts(baseline, universal, detected),
     ...compareEnforcement(universal, detected, buildCI),
   ];
