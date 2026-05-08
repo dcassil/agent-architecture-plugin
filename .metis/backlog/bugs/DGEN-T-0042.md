@@ -4,15 +4,15 @@ level: task
 title: "Bug: pre-commit installer rejects `simple-git-hooks + lint-staged` system from universal baseline"
 short_code: "DGEN-T-0042"
 created_at: 2026-05-08T20:25:01.046264+00:00
-updated_at: 2026-05-08T20:25:01.046264+00:00
+updated_at: 2026-05-08T21:24:54.436629+00:00
 parent: 
 blocked_by: []
 archived: false
 
 tags:
   - "#task"
-  - "#phase/backlog"
   - "#bug"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
@@ -79,6 +79,12 @@ DGEN-T-0029 dogfood — both synthesized repos hit this on auto-critical apply.
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
+
+## Acceptance Criteria
+
+## Acceptance Criteria
 
 ## Acceptance Criteria **[REQUIRED]**
 
@@ -149,4 +155,26 @@ DGEN-T-0029 dogfood — both synthesized repos hit this on auto-critical apply.
 
 ## Status Updates **[REQUIRED]**
 
-*To be added during implementation*
+### 2026-05-08 — Fixed
+
+Added install paths for `simple-git-hooks`, `lint-staged`, and the compound `simple-git-hooks + lint-staged` to `dev-genie/scripts/lib/pre-commit.mjs`.
+
+**Design:**
+- The dispatcher now splits `system` on `+`, dispatching each half. So `'simple-git-hooks'`, `'lint-staged'`, and `'simple-git-hooks + lint-staged'` all work, plus any future combinations.
+- `installSimpleGitHooks` writes/merges `package.json["simple-git-hooks"]["pre-commit"]` to `cmds.join(' && ')`. Indent and trailing newline preserved.
+- `installLintStaged` writes/merges `package.json["lint-staged"]["*.{ts,tsx,js,jsx,mjs,cjs}"]` (the universal-baseline glob).
+- For the compound, lint-flavored commands (anything matching `/eslint|lint/i`) become the lint-staged value; the simple-git-hooks pre-commit chains `npx lint-staged` + remaining commands.
+- Idempotent: re-running with the same args is a no-op.
+- Existing user config preserved unless caller passes `overwrite: true`.
+
+**Acceptance criteria:**
+- [x] `installPreCommitHooks(repo, { system: 'simple-git-hooks + lint-staged', commands })` succeeds on a repo with no prior pre-commit setup.
+- [x] Idempotent — verified.
+- [x] Existing user config merged, not overwritten — verified.
+- [x] Smoke tests added in `pre-commit.test.mjs` (5 new cases).
+
+**Files changed:**
+- `dev-genie/scripts/lib/pre-commit.mjs` — add compound dispatcher + simple-git-hooks/lint-staged installers.
+- `dev-genie/scripts/lib/pre-commit.test.mjs` — add 5 cases.
+
+**Test run:** `node --test dev-genie/lib/*.test.mjs dev-genie/scripts/lib/*.test.mjs` → 58/58 pass.

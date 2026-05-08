@@ -4,15 +4,15 @@ level: task
 title: "Bug: tsconfig JSON-Patch in apply-flow mangles `include` globs (`src/**/*` → `src*`)"
 short_code: "DGEN-T-0041"
 created_at: 2026-05-08T20:24:59.627392+00:00
-updated_at: 2026-05-08T20:24:59.627392+00:00
+updated_at: 2026-05-08T21:23:00.175308+00:00
 parent: 
 blocked_by: []
 archived: false
 
 tags:
   - "#task"
-  - "#phase/backlog"
   - "#bug"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
@@ -80,6 +80,12 @@ The JSONC-aware reader/writer probably treats `/**` as a comment marker even ins
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
+
+## Acceptance Criteria
+
+## Acceptance Criteria
 
 ## Acceptance Criteria **[REQUIRED]**
 
@@ -150,4 +156,24 @@ The JSONC-aware reader/writer probably treats `/**` as a comment marker even ins
 
 ## Status Updates **[REQUIRED]**
 
-*To be added during implementation*
+### 2026-05-08 — Fixed
+
+Root cause: `parseJsonc` in `dev-genie/lib/apply-flow.js` used `raw.replace(/\/\*[\s\S]*?\*\//g, '')` which is string-blind. In `"src/**/*"` the substring `/**/` (chars 4–7) matched the comment regex and got stripped, yielding `"src*"`. Same for `"app/**/*"`.
+
+Fix: replaced the regex stripper with a character-by-character `stripJsonc` state machine that:
+- copies string literals verbatim (handling `\\` and `\"` escapes), and
+- only strips `//` and `/* … */` comments outside strings.
+
+The trailing-comma normalizer is still a regex but now runs over already-stripped output so glob strings cannot collide with it.
+
+**Acceptance criteria:**
+- [x] Patching `compilerOptions` preserves all other top-level keys — covered by "preserves include globs" test.
+- [x] Strings containing `/*` or `*/` are never treated as comment delimiters — covered by "block comments but not when inside strings" + escape test.
+- [x] Tests cover globs, JSONC comments, trailing commas — yes.
+- [x] Idempotent re-apply leaves tsconfig identical — verified.
+
+**Files changed:**
+- `dev-genie/lib/apply-flow.js` — replace regex `parseJsonc` stripper with state-machine `stripJsonc`; export both for tests.
+- `dev-genie/lib/apply-flow-jsonc.test.mjs` — new (9 cases).
+
+**Test run:** `node --test dev-genie/lib/*.test.mjs dev-genie/scripts/lib/*.test.mjs` → 54/54 pass.

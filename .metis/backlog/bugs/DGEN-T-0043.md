@@ -4,15 +4,15 @@ level: task
 title: "Bug: report summary counts desync from rendered group counts after apply"
 short_code: "DGEN-T-0043"
 created_at: 2026-05-08T20:25:02.339418+00:00
-updated_at: 2026-05-08T20:25:02.339418+00:00
+updated_at: 2026-05-08T21:27:13.089787+00:00
 parent: 
 blocked_by: []
 archived: false
 
 tags:
   - "#task"
-  - "#phase/backlog"
   - "#bug"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
@@ -69,6 +69,12 @@ Reconcile the post-apply summary counts in `dev-genie/lib/apply-flow.js` / `repo
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
+
+## Acceptance Criteria
+
+## Acceptance Criteria
 
 ## Acceptance Criteria **[REQUIRED]**
 
@@ -139,4 +145,21 @@ Reconcile the post-apply summary counts in `dev-genie/lib/apply-flow.js` / `repo
 
 ## Status Updates **[REQUIRED]**
 
-*To be added during implementation*
+### 2026-05-08 — Fixed
+
+Root cause was in `dev-genie/lib/report.js` — the `formatReport` body filters out `status:'present'` findings before rendering per-severity groups, but its trailing summary line called `formatSummaryCounts(findings, c)` against the *unfiltered* list. Result: a baseline with one `present` and four gaps would render groups summing to 4, then print `Summary: 5 findings`. Apply-flow's own `applied/skipped/errors` accounting was correct (and is now covered by tests).
+
+**Fix:**
+- `formatSummaryCounts` is now called with `filtered` (the rendered subset). Headline label changed from "findings" → "gaps" so it's clear what the count represents.
+- Present-count is still surfaced in the parenthetical breakdown via a new `{ presentCount }` opt, so users can still see how many baseline matches existed.
+
+**Acceptance criteria:**
+- [x] Summary `applied + skipped + errors` equals total actionable — covered by 3 mode-specific invariant tests in `apply-flow-counts.test.mjs`.
+- [x] Summary breakdowns match `formatReport` body — new test parses the rendered output and asserts headline gap-count equals Σ per-severity counts.
+- [x] Unit tests assert invariants on synthesized findings — yes, 6 tests total.
+
+**Files changed:**
+- `dev-genie/lib/report.js` — fix summary to count rendered subset; add `presentCount` opt.
+- `dev-genie/lib/apply-flow-counts.test.mjs` — new (6 cases covering apply-all, auto-critical, dry-run, all-present, toJSON consistency, and formatReport headline invariant).
+
+**Test run:** `node --test dev-genie/lib/*.test.mjs dev-genie/scripts/lib/*.test.mjs` → 64/64 pass.

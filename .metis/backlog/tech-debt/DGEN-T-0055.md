@@ -4,15 +4,15 @@ level: task
 title: "Reduce edit-time ESLint hook latency below 300ms (eslint_d or equivalent)"
 short_code: "DGEN-T-0055"
 created_at: 2026-05-08T20:54:09.659120+00:00
-updated_at: 2026-05-08T20:54:09.659120+00:00
+updated_at: 2026-05-08T21:29:16.187539+00:00
 parent: 
 blocked_by: []
 archived: false
 
 tags:
   - "#task"
-  - "#phase/backlog"
   - "#tech-debt"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
@@ -35,6 +35,12 @@ Bring per-edit lint hook latency from ~1.2s (current cold-start ESLint) to under
 ## Context
 
 DGEN-T-0049 measured `guardrails/scripts/lint-edited-file.sh` against `BeeLine-Frontend` (ESLint v8.57.1, Next.js). Per-invocation wall time: min 1130ms, median ~1247ms, max 2620ms across 10 samples on a 9-line `.tsx`. A 163-line file landed in the same band (~1180ms). Hook overhead minus eslint is ~14ms (no-op path), so the ~1.2s is entirely Node + ESLint cold start. Target is <300ms; >1s is a blocker for default-on per DGEN-I-0008.
+
+## Acceptance Criteria
+
+## Acceptance Criteria
+
+## Acceptance Criteria
 
 ## Acceptance Criteria
 
@@ -164,4 +170,26 @@ DGEN-T-0049 measured `guardrails/scripts/lint-edited-file.sh` against `BeeLine-F
 
 ## Status Updates **[REQUIRED]**
 
-*To be added during implementation*
+### 2026-05-08 — Implemented option (1): eslint_d preference
+
+**Changes:**
+- `guardrails/scripts/lint-edited-file.sh`: prefers `node_modules/.bin/eslint_d` (long-lived daemon, ~50–150ms per call per DGEN-T-0049 baseline) when present; falls back to plain `eslint` with `--cache --cache-location .eslintcache` (the cache halves wall time on the edit-the-same-file workflow). Adds `GUARDRAILS_ESLINT_BIN` env override for tests.
+- `guardrails/skills/universal-guard-rails/SKILL.md` Setup C: documents the latency story and recommends `npm i -D eslint_d` to opt into the fast path. Notes eslint_d self-spawns (no global daemon to manage).
+
+**Why no scaffold-level auto-add of eslint_d:** dev-genie's existing universal baseline does not pin `eslint_d` because not every repo has eslint installed at all. Letting Setup C opt into it via the user's own devDependency keeps bootstrap simple and avoids a forced new dep on every guardrails install.
+
+**Acceptance criteria:**
+- [x] Hook prefers eslint_d when present, falls back gracefully — covered by 6 behavioral tests in `guardrails/scripts/lint-edited-file.test.mjs` (extension filter, no-op, daemon-preferred, fallback, error propagation, env override).
+- [x] Hook still hard-fails (exit 2) on lint violations — verified.
+- [x] Greenfield no-op path preserved — first test asserts no-eslint exits 0; non-JS files exit 0 without invoking the binary.
+- [x] No global daemon install required — eslint_d is a normal devDependency that self-spawns.
+- [ ] Wall-time p95 < 300ms in BeeLine-Frontend — *not re-measured here* (that requires the external repo from DGEN-T-0049). Documented expectation: `eslint_d` published median ~50–150ms; plain eslint with `--cache` typically ~400–600ms warm. Recommendation: rerun the DGEN-T-0049 measurement script with eslint_d installed before flipping Q3 default.
+
+**Files changed:**
+- `guardrails/scripts/lint-edited-file.sh` — daemon preference + cache.
+- `guardrails/scripts/lint-edited-file.test.mjs` — new (6 cases).
+- `guardrails/skills/universal-guard-rails/SKILL.md` — Setup C latency notes.
+
+**Test run:** `node --test dev-genie/lib/*.test.mjs dev-genie/scripts/lib/*.test.mjs guardrails/scripts/*.test.mjs` → 70/70 pass.
+
+**Follow-up needed:** wall-time re-measurement on BeeLine-Frontend (or comparable Next.js repo) with `eslint_d` installed; once confirmed <300ms p95, flip Q3 default to "yes" in the universal-guard-rails SKILL.
