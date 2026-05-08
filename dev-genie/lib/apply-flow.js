@@ -45,11 +45,52 @@ function detectIndent(raw) {
   return '  ';
 }
 
+// Strip JSONC comments + trailing commas without touching characters inside
+// string literals. The previous regex-based stripper ate `/**/` out of glob
+// strings like `"src/**/*"` (DGEN-T-0041).
+function stripJsonc(raw) {
+  let out = '';
+  const n = raw.length;
+  let i = 0;
+  while (i < n) {
+    const c = raw[i];
+    const next = raw[i + 1];
+    if (c === '"') {
+      // Copy the string literal verbatim, honoring escapes.
+      out += c;
+      i++;
+      while (i < n) {
+        const ch = raw[i];
+        out += ch;
+        if (ch === '\\' && i + 1 < n) {
+          out += raw[i + 1];
+          i += 2;
+          continue;
+        }
+        i++;
+        if (ch === '"') break;
+      }
+      continue;
+    }
+    if (c === '/' && next === '/') {
+      i += 2;
+      while (i < n && raw[i] !== '\n') i++;
+      continue;
+    }
+    if (c === '/' && next === '*') {
+      i += 2;
+      while (i < n && !(raw[i] === '*' && raw[i + 1] === '/')) i++;
+      i += 2;
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
+
 function parseJsonc(raw) {
-  const stripped = raw
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(^|[^:"'])\/\/.*$/gm, '$1')
-    .replace(/,(\s*[}\]])/g, '$1');
+  const stripped = stripJsonc(raw).replace(/,(\s*[}\]])/g, '$1');
   return JSON.parse(stripped);
 }
 
@@ -527,7 +568,7 @@ async function applyFindings({ repoPath, archId, findings, mode }) {
   return { applied, skipped, errors };
 }
 
-module.exports = { applyFindings, applyFinding, writeEslintManagedBlock };
+module.exports = { applyFindings, applyFinding, writeEslintManagedBlock, parseJsonc, stripJsonc };
 
 // ---------- smoke test --------------------------------------------------
 // node dev-genie/lib/apply-flow.js
