@@ -4,14 +4,14 @@ level: initiative
 title: "Capture cyclomatic complexity via scc and feed it into the audit composite"
 short_code: "DGEN-I-0007"
 created_at: 2026-05-08T20:27:15.697167+00:00
-updated_at: 2026-05-08T20:42:48.245162+00:00
+updated_at: 2026-05-08T21:07:14.841556+00:00
 parent: DGEN-V-0001
 blocked_by: []
 archived: false
 
 tags:
   - "#initiative"
-  - "#phase/active"
+  - "#phase/completed"
 
 
 exit_criteria_met: false

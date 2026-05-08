@@ -4,14 +4,14 @@ level: task
 title: "Add complexity fixture + scanner test asserting non-zero complexity"
 short_code: "DGEN-T-0045"
 created_at: 2026-05-08T20:39:29.253502+00:00
-updated_at: 2026-05-08T20:39:29.253502+00:00
+updated_at: 2026-05-08T21:07:12.295564+00:00
 parent: DGEN-I-0007
 blocked_by: []
 archived: false
 
 tags:
   - "#task"
-  - "#phase/todo"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
@@ -62,6 +62,10 @@ Add a small branchy fixture (nested if/else/switch/&& chains across one or two f
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
+
+## Acceptance Criteria
 
 ## Acceptance Criteria
 

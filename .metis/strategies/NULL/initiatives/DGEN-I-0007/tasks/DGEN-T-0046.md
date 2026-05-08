@@ -4,14 +4,14 @@ level: task
 title: "Tune avg/maxComplexity thresholds in audit.config.json and verify composite"
 short_code: "DGEN-T-0046"
 created_at: 2026-05-08T20:39:32.677375+00:00
-updated_at: 2026-05-08T20:39:32.677375+00:00
+updated_at: 2026-05-08T21:07:13.413838+00:00
 parent: DGEN-I-0007
 blocked_by: []
 archived: false
 
 tags:
   - "#task"
-  - "#phase/todo"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
@@ -62,6 +62,10 @@ With the scanner now emitting complexity, set `good`/`bad` thresholds for `avgCo
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
+
+## Acceptance Criteria
 
 ## Acceptance Criteria
 

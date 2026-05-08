@@ -4,14 +4,14 @@ level: task
 title: "Extend scanner.mjs to capture per-file complexity from scc"
 short_code: "DGEN-T-0044"
 created_at: 2026-05-08T20:39:26.686063+00:00
-updated_at: 2026-05-08T20:47:27.858881+00:00
+updated_at: 2026-05-08T21:07:06.492516+00:00
 parent: DGEN-I-0007
 blocked_by: []
 archived: false
 
 tags:
   - "#task"
-  - "#phase/active"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
@@ -62,6 +62,8 @@ Modify `audit/scripts/lib/scanner.mjs` to invoke scc with the per-file/complexit
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
 
 ## Acceptance Criteria
 
