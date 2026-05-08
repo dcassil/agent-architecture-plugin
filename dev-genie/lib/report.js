@@ -287,7 +287,9 @@ function formatReport(findings, opts) {
     lines.push('');
     lines.push(c(ANSI.green, 'No gaps found — config matches baseline.'));
     lines.push('');
-    lines.push(formatSummaryCounts(findings, c));
+    // Summary counts what was rendered. With nothing rendered, we still show
+    // the present-count for transparency.
+    lines.push(formatSummaryCounts(filtered, c, { presentCount: findings.length - filtered.length }));
     return lines.join('\n');
   }
 
@@ -353,20 +355,26 @@ function formatReport(findings, opts) {
   }
 
   lines.push('');
-  lines.push(formatSummaryCounts(findings, c));
+  // Summary counts only what was rendered (i.e. matches the per-group counts
+  // above). The "present" count from the unfiltered list is shown separately
+  // so it's clear how many findings were skipped from the body.
+  lines.push(
+    formatSummaryCounts(filtered, c, { presentCount: findings.length - filtered.length }),
+  );
   return lines.join('\n');
 }
 
-function formatSummaryCounts(findings, c) {
+function formatSummaryCounts(findings, c, opts) {
   const ct = counts(findings);
   const sev = ct.bySeverity || {};
   const st = ct.byStatus || {};
+  const presentCount = (opts && opts.presentCount != null) ? opts.presentCount : (st.present || 0);
   const parts = [
-    `${c(ANSI.bold, 'Summary:')} ${ct.total} findings`,
+    `${c(ANSI.bold, 'Summary:')} ${ct.total} gap${ct.total === 1 ? '' : 's'}`,
     `${c(ANSI.red, `${sev.critical || 0} critical`)}`,
     `${c(ANSI.yellow, `${sev.recommended || 0} recommended`)}`,
     `${c(ANSI.blue, `${sev.optional || 0} optional`)}`,
-    `${c(ANSI.dim, `(missing=${st.missing || 0}, weaker=${st.weaker || 0}, conflicting=${st.conflicting || 0}, present=${st.present || 0})`)}`,
+    `${c(ANSI.dim, `(missing=${st.missing || 0}, weaker=${st.weaker || 0}, conflicting=${st.conflicting || 0}, present=${presentCount})`)}`,
   ];
   return parts.join(' | ');
 }
