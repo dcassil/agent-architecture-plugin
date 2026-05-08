@@ -31,6 +31,7 @@ const { stdin: input, stdout: output } = require('node:process');
 const { toJSON, formatReport } = require('./report.js');
 const { addPackageScripts } = require('./write-helpers.js');
 const { applyEnsure } = require('./apply-ensure.js');
+const { writeLayeredEslintConfig } = require('./eslint-layered-writer.js');
 
 const ESLINT_SENTINEL_BEGIN = '// >>> dev-genie managed >>>';
 const ESLINT_SENTINEL_END = '// <<< dev-genie managed <<<';
@@ -212,26 +213,39 @@ async function writeEslintManagedBlock(repoPath, rulesEntries) {
         'no eslint.config.{mjs,js,cjs} found; create one (or use the arch-* boilerplate) before applying eslint findings.',
     };
   }
-  const before = (await readSafe(file)) || '';
-  const block = buildEslintManagedBlock(rulesEntries);
-  let next;
-  if (before.includes(ESLINT_SENTINEL_BEGIN) && before.includes(ESLINT_SENTINEL_END)) {
+
+  // Strip any legacy managed block that earlier versions of dev-genie may have
+  // appended (which produced a second `export default` and broke the module).
+  const beforeRaw = (await readSafe(file)) || '';
+  if (beforeRaw.includes(ESLINT_SENTINEL_BEGIN) && beforeRaw.includes(ESLINT_SENTINEL_END)) {
     const re = new RegExp(
-      `${escapeRegExp(ESLINT_SENTINEL_BEGIN)}[\\s\\S]*?${escapeRegExp(ESLINT_SENTINEL_END)}\\n?`,
+      `\\n*${escapeRegExp(ESLINT_SENTINEL_BEGIN)}[\\s\\S]*?${escapeRegExp(ESLINT_SENTINEL_END)}\\n?`,
       'm',
     );
-    next = before.replace(re, block);
-  } else {
-    next = before + (before.endsWith('\n') ? '' : '\n') + '\n' + block;
+    const cleaned = beforeRaw.replace(re, '');
+    if (cleaned !== beforeRaw) {
+      await fsp.writeFile(file, cleaned, 'utf8');
+    }
   }
-  if (next === before) {
-    return { ok: true, message: `eslint managed block already up to date in ${path.relative(repoPath, file)}` };
+
+  // Use the layered writer: emits a separate eslint.config.guardrails.mjs and
+  // rewrites the user's entry point to a proxy (with .dev-genie.bak backup).
+  // This avoids duplicating `export default` in the user's config.
+  const rules = Object.fromEntries(rulesEntries);
+  const res = writeLayeredEslintConfig(repoPath, rules, { rewriteEntryPoint: true });
+  if (!res.ok) {
+    return {
+      ok: false,
+      message:
+        res.mode === 'fallback-legacy'
+          ? `legacy ${res.fallbackReason || 'eslint config'}; cannot layer flat-config rules`
+          : `eslint layered write failed: ${res.fallbackReason || 'unknown'}`,
+    };
   }
-  await fsp.writeFile(file, next, 'utf8');
   return {
     ok: true,
     message:
-      `wrote managed override block to ${path.relative(repoPath, file)} ` +
+      `wrote layered override at ${path.relative(repoPath, res.path)} ` +
       `(${rulesEntries.length} rule${rulesEntries.length === 1 ? '' : 's'}).`,
   };
 }
@@ -513,7 +527,7 @@ async function applyFindings({ repoPath, archId, findings, mode }) {
   return { applied, skipped, errors };
 }
 
-module.exports = { applyFindings, applyFinding };
+module.exports = { applyFindings, applyFinding, writeEslintManagedBlock };
 
 // ---------- smoke test --------------------------------------------------
 // node dev-genie/lib/apply-flow.js
