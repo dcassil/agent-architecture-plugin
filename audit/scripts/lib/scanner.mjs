@@ -109,8 +109,11 @@ async function runDepcruise(bin, cwd, globs, timeoutMs) {
 }
 
 async function runScc(bin, cwd, timeoutMs) {
-  const args = ['--format', 'json', '.'];
-  const { stdout } = await execFileP(bin, args, { cwd, timeout: timeoutMs, maxBuffer: 64 * 1024 * 1024 });
+  // --by-file emits per-file entries (with `Complexity`) inside each language summary.
+  // We need them so the reducer can compute avg/max cyclomatic complexity — scc's
+  // language-level totals don't preserve the per-file distribution we need for max.
+  const args = ['--by-file', '--format', 'json', '.'];
+  const { stdout } = await execFileP(bin, args, { cwd, timeout: timeoutMs, maxBuffer: 256 * 1024 * 1024 });
   try {
     return JSON.parse(stdout);
   } catch {
@@ -181,24 +184,14 @@ export function reduce(dc, sc) {
   // Safety floor — at least 1 if we have modules.
   if (modules.length > 0 && maxDepth === 0) maxDepth = 1;
 
-  // Complexity: depcruise --metrics may not emit cyclomatic complexity per file in all versions.
-  // We support both `m.complexity` (number) and `m.metrics.cyclomaticComplexity`.
-  const complexities = [];
-  for (const m of modules) {
-    const cx =
-      typeof m.complexity === 'number' ? m.complexity :
-      typeof m?.metrics?.cyclomaticComplexity === 'number' ? m.metrics.cyclomaticComplexity :
-      null;
-    if (cx != null && Number.isFinite(cx)) complexities.push(cx);
-  }
-  const avgComplexity = complexities.length ? sum(complexities) / complexities.length : 0;
-  const maxComplexity = complexities.length ? Math.max(...complexities) : 0;
-
-  // LOC from scc
+  // LOC + complexity from scc (--by-file). scc's per-file `Complexity` is a
+  // language-agnostic heuristic, not a true CFG-based McCabe number, but it's
+  // good enough as a directional signal and works for every language scc supports.
   const langs = Array.isArray(sc) ? sc : (sc?.languageSummary || []);
   let totalLoc = 0;
   let totalFiles = 0;
   const perFileLoc = [];
+  const perFileComplexity = [];
   for (const lang of langs) {
     totalLoc += Number(lang.Code || lang.code || 0);
     totalFiles += Number(lang.Count || lang.count || 0);
@@ -206,7 +199,29 @@ export function reduce(dc, sc) {
     for (const f of files) {
       const c = Number(f.Code ?? f.code ?? 0);
       if (c > 0) perFileLoc.push(c);
+      const cx = f.Complexity ?? f.complexity;
+      if (cx != null && Number.isFinite(Number(cx))) perFileComplexity.push(Number(cx));
     }
+  }
+
+  // Prefer scc per-file complexity (real signal). Fall back to depcruise per-module
+  // complexity if scc didn't surface any (older scc, or fixtures without Complexity).
+  let avgComplexity = 0;
+  let maxComplexity = 0;
+  if (perFileComplexity.length) {
+    avgComplexity = sum(perFileComplexity) / perFileComplexity.length;
+    maxComplexity = Math.max(...perFileComplexity);
+  } else {
+    const dcCx = [];
+    for (const m of modules) {
+      const cx =
+        typeof m.complexity === 'number' ? m.complexity :
+        typeof m?.metrics?.cyclomaticComplexity === 'number' ? m.metrics.cyclomaticComplexity :
+        null;
+      if (cx != null && Number.isFinite(cx)) dcCx.push(cx);
+    }
+    avgComplexity = dcCx.length ? sum(dcCx) / dcCx.length : 0;
+    maxComplexity = dcCx.length ? Math.max(...dcCx) : 0;
   }
   if (perFileLoc.length === 0 && totalFiles > 0) {
     // No per-file detail; approximate distribution as uniform.

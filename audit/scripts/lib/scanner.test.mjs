@@ -39,3 +39,25 @@ test('reduce: empty inputs do not crash', () => {
   assert.equal(typeof m.totalLoc, 'number');
   assert.equal(m.totalLoc, 0);
 });
+
+test('reduce: prefers scc per-file Complexity over depcruise complexity', () => {
+  const dc = { modules: [{ source: 'a.ts', dependencies: [], complexity: 12 }] };
+  const sc = [{
+    Name: 'JavaScript', Code: 100, Count: 2,
+    Files: [
+      { Filename: 'a.js', Code: 60, Complexity: 30 },
+      { Filename: 'b.js', Code: 40, Complexity: 10 },
+    ],
+  }];
+  const m = reduce(dc, sc);
+  assert.equal(m.maxComplexity, 30);
+  assert.equal(m.avgComplexity, 20);
+});
+
+test('reduce: falls back to depcruise complexity when scc lacks Complexity', () => {
+  const dc = { modules: [{ source: 'a.ts', dependencies: [], complexity: 7 }] };
+  const sc = [{ Name: 'TypeScript', Code: 80, Count: 1, Files: [{ Filename: 'a.ts', Code: 80 }] }];
+  const m = reduce(dc, sc);
+  assert.equal(m.maxComplexity, 7);
+  assert.equal(m.avgComplexity, 7);
+});

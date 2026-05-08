@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-08T20:38:33.986Z",
+  "timestamp": "2026-05-08T20:51:52.306Z",
   "composites": {
     "architecture": 100,
-    "maintainability": 80.56,
-    "testability": 70.86,
-    "health": 83.2
+    "maintainability": 78.42,
+    "testability": 50.71,
+    "health": 76.26
   },
   "dominant": {
     "architecture": "cycles",
@@ -19,35 +19,35 @@
       "roots": 100
     },
     "maintainability": {
-      "avgLoc": 52.22,
+      "avgLoc": 46.47,
       "p90Loc": 100,
-      "edges": 89.15,
+      "edges": 88.64,
       "orphan": 100
     },
     "testability": {
-      "fan": 2.86,
-      "avgComplexity": 100,
-      "maxComplexity": 100,
+      "fan": 0,
+      "avgComplexity": 96.3,
+      "maxComplexity": 8.15,
       "circularRate": 100,
       "depth": 100
     }
   },
-  "scaleByLOC": 77.71,
+  "scaleByLOC": 75.23,
   "scanMetrics": {
     "cycles": 0,
     "depth": 1,
-    "roots": 0.3018867924528302,
-    "avgLoc": 243.34,
-    "p90Loc": 99.21,
-    "edges": 2.8679245283018866,
+    "roots": 0.3090909090909091,
+    "avgLoc": 260.58,
+    "p90Loc": 159,
+    "edges": 2.909090909090909,
     "orphan": 0,
-    "fan": 39,
-    "avgComplexity": 0,
-    "maxComplexity": 0,
+    "fan": 41,
+    "avgComplexity": 5.74,
+    "maxComplexity": 139,
     "circularRate": 0,
-    "totalLoc": 12897,
+    "totalLoc": 14332,
     "_meta": {
-      "wallMs": 450,
+      "wallMs": 348,
       "srcGlobs": [
         "audit",
         "guardrails",

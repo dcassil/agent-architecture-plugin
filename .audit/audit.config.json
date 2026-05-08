@@ -39,8 +39,8 @@
       "bad": 25
     },
     "maxComplexity": {
-      "good": 10,
-      "bad": 60
+      "good": 15,
+      "bad": 150
     },
     "circularRate": {
       "good": 0,
