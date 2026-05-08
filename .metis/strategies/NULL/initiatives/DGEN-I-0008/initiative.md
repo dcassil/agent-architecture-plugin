@@ -4,14 +4,14 @@ level: initiative
 title: "Edit-time lint/type feedback for AI agents"
 short_code: "DGEN-I-0008"
 created_at: 2026-05-08T20:37:12.385165+00:00
-updated_at: 2026-05-08T20:47:23.832673+00:00
+updated_at: 2026-05-08T21:02:57.433861+00:00
 parent: 
 blocked_by: []
 archived: false
 
 tags:
   - "#initiative"
-  - "#phase/active"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
