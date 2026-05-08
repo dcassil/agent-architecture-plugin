@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-05-08T19:17:36.993Z",
+  "composites": {
+    "architecture": 100,
+    "maintainability": 88.29,
+    "testability": 95.71,
+    "health": 95.2
+  },
+  "dominant": {
+    "architecture": "cycles",
+    "maintainability": "avgLoc",
+    "testability": "fan",
+    "health": "maintainability"
+  },
+  "contributions": {
+    "architecture": {
+      "cycles": 100,
+      "depth": 100,
+      "roots": 100
+    },
+    "maintainability": {
+      "avgLoc": 66.55,
+      "p90Loc": 100,
+      "edges": 100,
+      "orphan": 100
+    },
+    "testability": {
+      "fan": 85.71,
+      "avgComplexity": 100,
+      "maxComplexity": 100,
+      "circularRate": 100,
+      "depth": 100
+    }
+  },
+  "scaleByLOC": 100,
+  "scanMetrics": {
+    "cycles": 0,
+    "depth": 1,
+    "roots": 0.30434782608695654,
+    "avgLoc": 200.35,
+    "p90Loc": 64,
+    "edges": 1.5217391304347827,
+    "orphan": 0,
+    "fan": 10,
+    "avgComplexity": 0,
+    "maxComplexity": 0,
+    "circularRate": 0,
+    "totalLoc": 4608,
+    "_meta": {
+      "wallMs": 427,
+      "srcGlobs": [
+        "audit",
+        "guardrails",
+        "dev-genie"
+      ],
+      "depcruiseBin": "/Users/danielcassil/.nvm/versions/node/v18.20.4/bin/depcruise",
+      "sccBin": "/opt/homebrew/bin/scc"
+    }
+  }
+}

@@ -17,6 +17,7 @@ Format follows the Cadre architecture catalog convention (see ultra-metis `archi
 - [`react-next-vercel-webapp/`](./react-next-vercel-webapp/) — Next.js (App Router) on Vercel
 - [`node-api/`](./node-api/) — Standalone Node.js HTTP API service
 - [`supabase-api/`](./supabase-api/) — Supabase Edge Functions + Postgres backend
+- [`supabase-node-rag/`](./supabase-node-rag/) — Next.js + Supabase + pgvector RAG backend
 
 ## Using a pattern
 

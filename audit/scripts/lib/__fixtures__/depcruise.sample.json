@@ -1,0 +1,43 @@
+{
+  "modules": [
+    {
+      "source": "src/a.ts",
+      "dependencies": [
+        { "resolved": "src/b.ts", "circular": false, "cycle": [] },
+        { "resolved": "src/c.ts", "circular": false, "cycle": [] }
+      ],
+      "dependents": [],
+      "complexity": 3
+    },
+    {
+      "source": "src/b.ts",
+      "dependencies": [
+        { "resolved": "src/c.ts", "circular": false, "cycle": [] }
+      ],
+      "dependents": ["src/a.ts"],
+      "complexity": 5
+    },
+    {
+      "source": "src/c.ts",
+      "dependencies": [
+        { "resolved": "src/d.ts", "circular": true, "cycle": ["src/c.ts","src/d.ts"] }
+      ],
+      "dependents": ["src/a.ts","src/b.ts"],
+      "complexity": 8
+    },
+    {
+      "source": "src/d.ts",
+      "dependencies": [
+        { "resolved": "src/c.ts", "circular": true, "cycle": ["src/d.ts","src/c.ts"] }
+      ],
+      "dependents": ["src/c.ts"],
+      "complexity": 12
+    },
+    {
+      "source": "src/orphan.ts",
+      "dependencies": [],
+      "dependents": [],
+      "complexity": 1
+    }
+  ]
+}

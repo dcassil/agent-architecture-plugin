@@ -3,7 +3,7 @@ description: Copy one of the guard-rails architecture boilerplates (eslint.confi
 argument-hint: <pattern> [target-dir]
 ---
 
-You are scaffolding a project from the guard-rails-boilerplate catalog.
+You are scaffolding a project from the guardrails plugin's architecture catalog.
 
 Pattern requested: `$1`
 Target directory: `$2` (default: current working directory)
@@ -18,7 +18,7 @@ Steps:
 
    If `$1` is empty or unrecognized, list the four options and ask which one. Do not guess.
 
-2. Locate the source. The catalog lives at the root of this repo under `architectures/<pattern>/`. If you can't find it relative to the current working directory, ask the user for the path to the `gaurd-rails-boilerplate` repo.
+2. Locate the source. The catalog lives inside this plugin at `${CLAUDE_PLUGIN_ROOT}/architectures/<pattern>/` (i.e. the guardrails plugin's own `architectures/<pattern>/` directory). Do not look outside the plugin directory.
 
 3. Read the pattern's `README.md` and surface the **Overview**, **When to avoid**, and **Layers** sections so the user confirms it fits.
 

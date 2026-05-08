@@ -1,0 +1,50 @@
+{
+  "regressionThreshold": 5,
+  "requireImprovement": false,
+  "baselines": {
+    "cycles": {
+      "good": 0,
+      "bad": 0.1
+    },
+    "depth": {
+      "good": 4,
+      "bad": 15
+    },
+    "roots": {
+      "good": 0.1,
+      "bad": 0
+    },
+    "avgLoc": {
+      "good": 100,
+      "bad": 400
+    },
+    "p90Loc": {
+      "good": 200,
+      "bad": 600
+    },
+    "edges": {
+      "good": 2,
+      "bad": 10
+    },
+    "orphan": {
+      "good": 0,
+      "bad": 0.2
+    },
+    "fan": {
+      "good": 5,
+      "bad": 40
+    },
+    "avgComplexity": {
+      "good": 5,
+      "bad": 25
+    },
+    "maxComplexity": {
+      "good": 10,
+      "bad": 60
+    },
+    "circularRate": {
+      "good": 0,
+      "bad": 0.1
+    }
+  }
+}

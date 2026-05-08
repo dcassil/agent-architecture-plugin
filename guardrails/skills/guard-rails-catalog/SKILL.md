@@ -3,9 +3,9 @@ name: guard-rails-catalog
 description: Use when starting a new TypeScript project, choosing an architecture, or asking which boilerplate to copy. Indexes the architecture pattern catalog (Next.js + Vercel, Node API, Supabase) and routes to the right per-architecture skill.
 ---
 
-# Guard Rails Boilerplate Catalog
+# Guard Rails Catalog
 
-This project is a **catalog of TypeScript architecture patterns**. Each pattern ships a `README.md` (the architecture spec) plus starter `eslint.config.mjs` and `tsconfig.json` that encode the rules into automated checks.
+This plugin (the `guardrails` plugin in the dev-genie ecosystem) is a **catalog of TypeScript architecture patterns**. Each pattern ships a `README.md` (the architecture spec) plus starter `eslint.config.mjs` and `tsconfig.json` that encode the rules into automated checks.
 
 ## Available architectures
 
@@ -16,7 +16,7 @@ This project is a **catalog of TypeScript architecture patterns**. Each pattern 
 | `supabase-api` | Data-access-dominant app; Postgres + RLS as the API; Edge Functions for the rest | `arch-supabase-api` |
 | `supabase-node-rag` | Next.js + Supabase + pgvector RAG backend; Route Handler orchestrates retrieval + generation | `arch-supabase-node-rag` |
 
-Patterns live under `architectures/<name>/` in this repo.
+Patterns live under `architectures/<name>/` in this plugin.
 
 ## Shared philosophy (all patterns)
 

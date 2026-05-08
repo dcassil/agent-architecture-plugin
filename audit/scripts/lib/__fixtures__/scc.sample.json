@@ -1,0 +1,14 @@
+[
+  {
+    "Name": "TypeScript",
+    "Code": 500,
+    "Count": 5,
+    "Files": [
+      { "Filename": "src/a.ts", "Code": 80 },
+      { "Filename": "src/b.ts", "Code": 120 },
+      { "Filename": "src/c.ts", "Code": 200 },
+      { "Filename": "src/d.ts", "Code": 90 },
+      { "Filename": "src/orphan.ts", "Code": 10 }
+    ]
+  }
+]

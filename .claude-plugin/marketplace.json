@@ -1,14 +1,24 @@
 {
-  "name": "guard-rails-boilerplate",
+  "name": "dev-genie",
   "owner": {
     "name": "Daniel Cassil",
     "email": "me@danielcassil.com"
   },
   "plugins": [
     {
-      "name": "guard-rails-boilerplate",
-      "source": "./",
-      "description": "Architecture catalog: Next.js + Vercel, Node API, Supabase, and Supabase RAG (pgvector) — each with ESLint/TS guard rails enforcing layer boundaries, no cross-feature imports, file/complexity caps."
+      "name": "dev-genie",
+      "source": "./dev-genie",
+      "description": "Umbrella bootstrap plugin: /dev-genie-init detects project state and orchestrates installation of guardrails + audit, optionally scaffolding a baseline architecture."
+    },
+    {
+      "name": "guardrails",
+      "source": "./guardrails",
+      "description": "Architecture catalog (Next.js + Vercel, Node API, Supabase, Supabase RAG/pgvector) with ESLint + TypeScript guard rails enforcing layer boundaries, no cross-feature imports, and file/complexity caps."
+    },
+    {
+      "name": "audit",
+      "source": "./audit",
+      "description": "Composite quality scoring across ESLint, TypeScript, tests, and security checks via /audit-init and /audit-run, plus a pre-commit gate."
     }
   ]
 }
