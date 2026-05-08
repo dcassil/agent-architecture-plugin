@@ -1,0 +1,21 @@
+{
+  "architectures": [
+    {
+      "id": "node-api",
+      "file": "node-api.json"
+    },
+    {
+      "id": "react-next-vercel-webapp",
+      "file": "react-next-vercel-webapp.json"
+    },
+    {
+      "id": "supabase-api",
+      "file": "supabase-api.json"
+    },
+    {
+      "id": "supabase-node-rag",
+      "file": "supabase-node-rag.json"
+    }
+  ],
+  "universal": "universal.json"
+}

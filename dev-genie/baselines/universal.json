@@ -1,0 +1,45 @@
+{
+  "requiredScripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "verify": "npm run typecheck && npm run lint",
+    "prebuild": "npm run verify"
+  },
+  "requiredDevDependencies": {
+    "simple-git-hooks": "^2.11.0",
+    "lint-staged": "^15.2.0"
+  },
+  "simpleGitHooks": {
+    "pre-commit": "npx lint-staged && npm run typecheck"
+  },
+  "lintStaged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": "eslint --max-warnings=0"
+  },
+  "ciWorkflow": ".github/workflows/verify.yml",
+  "agentGuardrailFile": "AGENTS.md",
+  "enforcementPoints": [
+    {
+      "stage": "pre-commit",
+      "mechanism": "simple-git-hooks + lint-staged",
+      "runs": [
+        "eslint --max-warnings=0",
+        "tsc --noEmit"
+      ]
+    },
+    {
+      "stage": "build",
+      "mechanism": "npm prebuild script",
+      "runs": [
+        "npm run verify"
+      ]
+    },
+    {
+      "stage": "ci",
+      "mechanism": ".github/workflows/verify.yml",
+      "runs": [
+        "npm run verify"
+      ]
+    }
+  ],
+  "source": "guardrails/skills/universal-guard-rails/SKILL.md"
+}

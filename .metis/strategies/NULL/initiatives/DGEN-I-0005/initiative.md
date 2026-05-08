@@ -4,14 +4,14 @@ level: initiative
 title: "Init dev-genie into existing repos: detect, compare, and reconcile config"
 short_code: "DGEN-I-0005"
 created_at: 2026-05-08T19:15:48.221718+00:00
-updated_at: 2026-05-08T19:15:48.221718+00:00
+updated_at: 2026-05-08T19:19:23.762781+00:00
 parent: DGEN-V-0001
 blocked_by: []
 archived: false
 
 tags:
   - "#initiative"
-  - "#phase/discovery"
+  - "#phase/active"
 
 
 exit_criteria_met: false

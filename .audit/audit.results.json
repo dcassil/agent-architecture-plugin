@@ -1,16 +1,17 @@
 {
-  "timestamp": "2026-05-08T19:17:36.993Z",
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-08T19:57:38.737Z",
   "composites": {
     "architecture": 100,
-    "maintainability": 88.29,
-    "testability": 95.71,
-    "health": 95.2
+    "maintainability": 83.04,
+    "testability": 81.14,
+    "health": 87.69
   },
   "dominant": {
     "architecture": "cycles",
     "maintainability": "avgLoc",
     "testability": "fan",
-    "health": "maintainability"
+    "health": "testability"
   },
   "contributions": {
     "architecture": {
@@ -19,35 +20,35 @@
       "roots": 100
     },
     "maintainability": {
-      "avgLoc": 66.55,
+      "avgLoc": 54.17,
       "p90Loc": 100,
-      "edges": 100,
+      "edges": 96.34,
       "orphan": 100
     },
     "testability": {
-      "fan": 85.71,
+      "fan": 37.14,
       "avgComplexity": 100,
       "maxComplexity": 100,
       "circularRate": 100,
       "depth": 100
     }
   },
-  "scaleByLOC": 100,
+  "scaleByLOC": 84.32,
   "scanMetrics": {
     "cycles": 0,
     "depth": 1,
-    "roots": 0.30434782608695654,
-    "avgLoc": 200.35,
-    "p90Loc": 64,
-    "edges": 1.5217391304347827,
+    "roots": 0.24390243902439024,
+    "avgLoc": 237.49,
+    "p90Loc": 98.35,
+    "edges": 2.292682926829268,
     "orphan": 0,
-    "fan": 10,
+    "fan": 27,
     "avgComplexity": 0,
     "maxComplexity": 0,
     "circularRate": 0,
-    "totalLoc": 4608,
+    "totalLoc": 9737,
     "_meta": {
-      "wallMs": 427,
+      "wallMs": 322,
       "srcGlobs": [
         "audit",
         "guardrails",

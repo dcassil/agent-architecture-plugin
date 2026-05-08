@@ -8,6 +8,16 @@ You are running the dev-genie one-time bootstrap flow. dev-genie owns no scoring
 
 1. **Detect the project.** Read `${CLAUDE_PLUGIN_ROOT}/skills/project-detection/SKILL.md` (or `dev-genie/skills/project-detection/SKILL.md` if not running as a plugin) and run its checks against the current working directory. Capture the structured output (`project_kind`, `suggested_architecture`, `confidence`, `raw_signals`, `notes`). Show the result to the user before proceeding.
 
+   **Branch on project_kind.** If `project_kind == existing` (any of eslint / tsconfig / scripts / hooks already present), take the **existing-repo branch**: invoke the bin script and stop after it returns:
+
+   ```
+   node ${CLAUDE_PLUGIN_ROOT}/bin/dev-genie-init.mjs --repo <cwd> [--arch <id>] [--mode <mode>]
+   ```
+
+   (or `node dev-genie/bin/dev-genie-init.mjs ...` outside plugin mode). The script orchestrates `detectConfig → compareConfig → formatReport → applyFindings`, prompts the user for arch (when `confidence != high`) and apply mode (`dry-run | auto-critical | interactive | apply-all | quit`), and prints the final applied/skipped/errors summary. Pass `--dry-run` if the user only wants a preview.
+
+   For the **greenfield branch** (`project_kind == greenfield` — no manifests, no eslint/tsconfig/scripts/hooks), continue with the original orchestration steps below.
+
 2. **Load the orchestration registry.** Read `${CLAUDE_PLUGIN_ROOT}/skills/orchestration/SKILL.md` (or `dev-genie/skills/orchestration/SKILL.md` if not running as a plugin). The Sub-plugin registry section is the ordered list of work for this command.
 
 3. **Walk the registry in order.** For each entry — currently `guardrails` then `audit`:

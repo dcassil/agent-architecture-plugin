@@ -1,0 +1,246 @@
+{
+  "archId": "react-next-vercel-webapp",
+  "source": {
+    "eslintConfig": "guardrails/architectures/react-next-vercel-webapp/eslint.config.mjs",
+    "tsconfig": "guardrails/architectures/react-next-vercel-webapp/tsconfig.json"
+  },
+  "eslint": {
+    "ignores": [
+      "**/.next/**",
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/coverage/**",
+      "**/*.d.ts"
+    ],
+    "base": {
+      "files": [
+        "**/*.{ts,tsx}"
+      ],
+      "rules": {
+        "max-lines": [
+          "error",
+          {
+            "max": 200,
+            "skipBlankLines": true,
+            "skipComments": true
+          }
+        ],
+        "max-lines-per-function": [
+          "warn",
+          {
+            "max": 80,
+            "skipBlankLines": true,
+            "skipComments": true
+          }
+        ],
+        "complexity": [
+          "warn",
+          {
+            "max": 10
+          }
+        ],
+        "max-depth": [
+          "warn",
+          4
+        ],
+        "max-params": [
+          "warn",
+          4
+        ],
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "*/features/*/!(index)",
+                  "@/features/*/!(index)"
+                ],
+                "message": "Import features only via their public entry. No deep imports across features."
+              },
+              {
+                "group": [
+                  "server-only"
+                ],
+                "importNames": [
+                  "default"
+                ],
+                "message": "OK in server modules; client components must not import server-only code."
+              }
+            ],
+            "paths": [
+              {
+                "name": "process",
+                "importNames": [
+                  "env"
+                ],
+                "message": "Use the validated env from lib/env.ts instead of process.env."
+              }
+            ]
+          }
+        ],
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "ExportAllDeclaration",
+            "message": "Re-exports (export * from) are not allowed. Export explicitly."
+          },
+          {
+            "selector": "MemberExpression[object.name='process'][property.name='env']",
+            "message": "Use lib/env.ts instead of accessing process.env directly."
+          }
+        ],
+        "@typescript-eslint/no-explicit-any": "error",
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          {
+            "prefer": "type-imports",
+            "fixStyle": "inline-type-imports"
+          }
+        ],
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_"
+          }
+        ],
+        "@typescript-eslint/no-non-null-assertion": "warn",
+        "@typescript-eslint/consistent-type-definitions": [
+          "error",
+          "interface"
+        ],
+        "no-console": [
+          "error",
+          {
+            "allow": [
+              "warn",
+              "error"
+            ]
+          }
+        ],
+        "no-debugger": "error",
+        "no-duplicate-imports": "error",
+        "eqeqeq": [
+          "error",
+          "always",
+          {
+            "null": "ignore"
+          }
+        ],
+        "prefer-const": "error",
+        "no-var": "error",
+        "object-shorthand": [
+          "error",
+          "always"
+        ],
+        "prefer-template": "error"
+      },
+      "unresolvedSpreads": [
+        "reactHooks.configs.recommended.rules",
+        "nextPlugin.configs.recommended.rules",
+        "nextPlugin.configs['core-web-vitals'].rules"
+      ]
+    },
+    "overrides": [
+      {
+        "files": [
+          "**/lib/env.ts",
+          "**/lib/env/*.ts"
+        ],
+        "rules": {
+          "no-restricted-imports": "off",
+          "no-restricted-syntax": "off"
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "**/*.test.{ts,tsx}",
+          "**/*.spec.{ts,tsx}",
+          "**/tests/**/*.{ts,tsx}"
+        ],
+        "rules": {
+          "max-lines": [
+            "error",
+            {
+              "max": 500,
+              "skipBlankLines": true,
+              "skipComments": true
+            }
+          ],
+          "max-lines-per-function": "off",
+          "@typescript-eslint/no-explicit-any": "off"
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "*.config.{js,mjs,ts}",
+          "*.config.*.{js,mjs,ts}"
+        ],
+        "rules": {
+          "no-restricted-imports": "off",
+          "no-restricted-syntax": "off"
+        },
+        "unresolvedSpreads": []
+      }
+    ]
+  },
+  "tsconfig": {
+    "compilerOptions": {
+      "target": "ES2022",
+      "lib": [
+        "dom",
+        "dom.iterable",
+        "ES2022"
+      ],
+      "module": "ESNext",
+      "moduleResolution": "Bundler",
+      "jsx": "preserve",
+      "allowJs": false,
+      "skipLibCheck": true,
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "incremental": true,
+      "plugins": [
+        {
+          "name": "next"
+        }
+      ],
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "noImplicitOverride": true,
+      "noFallthroughCasesInSwitch": true,
+      "noPropertyAccessFromIndexSignature": true,
+      "exactOptionalPropertyTypes": true,
+      "useUnknownInCatchVariables": true,
+      "forceConsistentCasingInFileNames": true,
+      "noEmit": true,
+      "baseUrl": ".",
+      "paths": {
+        "@/*": [
+          "./*"
+        ]
+      }
+    },
+    "include": [
+      "next-env.d.ts",
+      "**/*.ts",
+      "**/*.tsx",
+      ".next/types/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      ".next",
+      "dist"
+    ]
+  },
+  "requiredScripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run lint"
+  }
+}

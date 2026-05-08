@@ -1,0 +1,249 @@
+{
+  "archId": "node-api",
+  "source": {
+    "eslintConfig": "guardrails/architectures/node-api/eslint.config.mjs",
+    "tsconfig": "guardrails/architectures/node-api/tsconfig.json"
+  },
+  "eslint": {
+    "ignores": [
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/coverage/**",
+      "**/*.d.ts"
+    ],
+    "base": {
+      "files": [
+        "**/*.ts"
+      ],
+      "rules": {
+        "max-lines": [
+          "error",
+          {
+            "max": 200,
+            "skipBlankLines": true,
+            "skipComments": true
+          }
+        ],
+        "complexity": [
+          "warn",
+          {
+            "max": 10
+          }
+        ],
+        "max-depth": [
+          "warn",
+          4
+        ],
+        "max-params": [
+          "warn",
+          4
+        ],
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "fastify",
+                  "express",
+                  "hono",
+                  "@fastify/*",
+                  "@hono/*"
+                ],
+                "message": "HTTP framework imports are not allowed here. Restricted in services/* and repositories/*; override per-file if this is app/route wiring."
+              }
+            ],
+            "paths": [
+              {
+                "name": "process",
+                "importNames": [
+                  "env"
+                ],
+                "message": "Use config/env.ts (validated env) instead of process.env."
+              }
+            ]
+          }
+        ],
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "ExportAllDeclaration",
+            "message": "Re-exports (export * from) are not allowed. Export explicitly."
+          },
+          {
+            "selector": "MemberExpression[object.name='process'][property.name='env']",
+            "message": "Use config/env.ts instead of accessing process.env directly."
+          }
+        ],
+        "@typescript-eslint/no-explicit-any": "error",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-misused-promises": "error",
+        "@typescript-eslint/await-thenable": "error",
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          {
+            "prefer": "type-imports",
+            "fixStyle": "inline-type-imports"
+          }
+        ],
+        "@typescript-eslint/consistent-type-definitions": [
+          "error",
+          "interface"
+        ],
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_"
+          }
+        ],
+        "@typescript-eslint/no-non-null-assertion": "warn",
+        "no-console": "error",
+        "no-debugger": "error",
+        "no-duplicate-imports": "error",
+        "eqeqeq": [
+          "error",
+          "always",
+          {
+            "null": "ignore"
+          }
+        ],
+        "prefer-const": "error",
+        "no-var": "error",
+        "object-shorthand": [
+          "error",
+          "always"
+        ],
+        "prefer-template": "error"
+      },
+      "unresolvedSpreads": []
+    },
+    "overrides": [
+      {
+        "files": [
+          "**/src/app.ts",
+          "**/src/server.ts",
+          "**/src/routes/**/*.ts"
+        ],
+        "rules": {
+          "no-restricted-imports": [
+            "error",
+            {
+              "paths": [
+                {
+                  "name": "process",
+                  "importNames": [
+                    "env"
+                  ],
+                  "message": "Use config/env.ts instead of process.env."
+                }
+              ]
+            }
+          ]
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "**/src/handlers/**/*.ts"
+        ],
+        "rules": {
+          "no-restricted-imports": [
+            "error",
+            {
+              "patterns": [
+                {
+                  "group": [
+                    "**/repositories/*",
+                    "*/repositories/*"
+                  ],
+                  "message": "Handlers must not call repositories directly. Go through a service."
+                }
+              ]
+            }
+          ]
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "**/src/config/env.ts"
+        ],
+        "rules": {
+          "no-restricted-imports": "off",
+          "no-restricted-syntax": "off"
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "**/*.test.ts",
+          "**/*.spec.ts",
+          "**/tests/**/*.ts"
+        ],
+        "rules": {
+          "max-lines": [
+            "error",
+            {
+              "max": 500,
+              "skipBlankLines": true,
+              "skipComments": true
+            }
+          ],
+          "@typescript-eslint/no-explicit-any": "off",
+          "@typescript-eslint/no-floating-promises": "off",
+          "no-console": "off"
+        },
+        "unresolvedSpreads": []
+      }
+    ]
+  },
+  "tsconfig": {
+    "compilerOptions": {
+      "target": "ES2022",
+      "lib": [
+        "ES2022"
+      ],
+      "module": "NodeNext",
+      "moduleResolution": "NodeNext",
+      "outDir": "./dist",
+      "rootDir": "./src",
+      "declaration": true,
+      "declarationMap": true,
+      "sourceMap": true,
+      "composite": true,
+      "incremental": true,
+      "skipLibCheck": true,
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "forceConsistentCasingInFileNames": true,
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "noImplicitOverride": true,
+      "noFallthroughCasesInSwitch": true,
+      "noPropertyAccessFromIndexSignature": true,
+      "exactOptionalPropertyTypes": true,
+      "useUnknownInCatchVariables": true,
+      "noImplicitReturns": true,
+      "types": [
+        "node"
+      ]
+    },
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "dist",
+      "**/*.test.ts",
+      "**/*.spec.ts"
+    ]
+  },
+  "requiredScripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run lint"
+  }
+}

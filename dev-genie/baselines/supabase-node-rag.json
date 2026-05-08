@@ -1,0 +1,280 @@
+{
+  "archId": "supabase-node-rag",
+  "source": {
+    "eslintConfig": "guardrails/architectures/supabase-node-rag/eslint.config.mjs",
+    "tsconfig": "guardrails/architectures/supabase-node-rag/tsconfig.json"
+  },
+  "eslint": {
+    "ignores": [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/coverage/**",
+      "**/*.d.ts",
+      "supabase/.branches/**",
+      "supabase/.temp/**"
+    ],
+    "base": {
+      "files": [
+        "app/**/*.{ts,tsx}",
+        "lib/**/*.ts",
+        "types/**/*.ts",
+        "supabase/seed/**/*.ts"
+      ],
+      "rules": {
+        "max-lines": [
+          "error",
+          {
+            "max": 250,
+            "skipBlankLines": true,
+            "skipComments": true
+          }
+        ],
+        "complexity": [
+          "warn",
+          {
+            "max": 10
+          }
+        ],
+        "max-depth": [
+          "warn",
+          4
+        ],
+        "max-params": [
+          "warn",
+          4
+        ],
+        "@typescript-eslint/no-explicit-any": "error",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          {
+            "prefer": "type-imports",
+            "fixStyle": "inline-type-imports"
+          }
+        ],
+        "@typescript-eslint/consistent-type-definitions": [
+          "error",
+          "interface"
+        ],
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_"
+          }
+        ],
+        "@typescript-eslint/no-non-null-assertion": "warn",
+        "no-debugger": "error",
+        "no-duplicate-imports": "error",
+        "eqeqeq": [
+          "error",
+          "always",
+          {
+            "null": "ignore"
+          }
+        ],
+        "prefer-const": "error",
+        "no-var": "error",
+        "object-shorthand": [
+          "error",
+          "always"
+        ],
+        "prefer-template": "error",
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "ExportAllDeclaration",
+            "message": "Re-exports (export * from) are not allowed. Export explicitly."
+          },
+          {
+            "selector": "MemberExpression[object.name='process'][property.name='env']",
+            "message": "Use lib/server/env.ts (zod-validated env) instead of process.env directly."
+          }
+        ]
+      },
+      "unresolvedSpreads": []
+    },
+    "overrides": [
+      {
+        "files": [
+          "app/(ui)/**/*.{ts,tsx}",
+          "app/**/components/**/*.{ts,tsx}",
+          "lib/shared/**/*.ts"
+        ],
+        "rules": {
+          "no-restricted-imports": [
+            "error",
+            {
+              "patterns": [
+                {
+                  "group": [
+                    "**/lib/server/*",
+                    "@/lib/server/*",
+                    "server-only"
+                  ],
+                  "message": "Client code must not import from lib/server/* or server-only."
+                },
+                {
+                  "group": [
+                    "@supabase/supabase-js"
+                  ],
+                  "message": "Client code must not import @supabase/supabase-js. Go through the Route Handler."
+                }
+              ]
+            }
+          ]
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "lib/server/**/*.ts",
+          "app/api/**/*.ts"
+        ],
+        "rules": {
+          "no-restricted-imports": [
+            "error",
+            {
+              "paths": [
+                {
+                  "name": "@supabase/supabase-js",
+                  "importNames": [
+                    "createClient"
+                  ],
+                  "message": "createClient is allowed only in lib/server/supabase.ts. Import the factory from there."
+                }
+              ]
+            }
+          ],
+          "no-console": "warn"
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "lib/server/supabase.ts"
+        ],
+        "rules": {
+          "no-restricted-imports": "off"
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "lib/server/env.ts"
+        ],
+        "rules": {
+          "no-restricted-syntax": "off",
+          "no-restricted-imports": "off"
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "lib/server/embeddings.ts",
+          "lib/server/generation.ts"
+        ],
+        "rules": {
+          "no-restricted-imports": "off"
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "types/database.ts",
+          "types/database.types.ts"
+        ],
+        "rules": {
+          "max-lines": "off",
+          "@typescript-eslint/no-explicit-any": "off",
+          "@typescript-eslint/consistent-type-definitions": "off"
+        },
+        "unresolvedSpreads": []
+      },
+      {
+        "files": [
+          "**/*.test.ts",
+          "**/*.spec.ts",
+          "supabase/tests/**/*.ts"
+        ],
+        "rules": {
+          "max-lines": [
+            "error",
+            {
+              "max": 500,
+              "skipBlankLines": true,
+              "skipComments": true
+            }
+          ],
+          "@typescript-eslint/no-explicit-any": "off",
+          "@typescript-eslint/no-floating-promises": "off",
+          "no-console": "off"
+        },
+        "unresolvedSpreads": []
+      }
+    ]
+  },
+  "tsconfig": {
+    "compilerOptions": {
+      "target": "ES2022",
+      "lib": [
+        "ES2022",
+        "DOM",
+        "DOM.Iterable"
+      ],
+      "module": "ESNext",
+      "moduleResolution": "Bundler",
+      "allowImportingTsExtensions": true,
+      "noEmit": true,
+      "jsx": "preserve",
+      "skipLibCheck": true,
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "forceConsistentCasingInFileNames": true,
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "noImplicitOverride": true,
+      "noFallthroughCasesInSwitch": true,
+      "noPropertyAccessFromIndexSignature": true,
+      "exactOptionalPropertyTypes": true,
+      "useUnknownInCatchVariables": true,
+      "noImplicitReturns": true,
+      "baseUrl": ".",
+      "paths": {
+        "@/*": [
+          "./*"
+        ]
+      },
+      "plugins": [
+        {
+          "name": "next"
+        }
+      ]
+    },
+    "include": [
+      "next-env.d.ts",
+      "app/**/*.ts",
+      "app/**/*.tsx",
+      "lib/**/*.ts",
+      "types/**/*.ts",
+      "supabase/seed/**/*.ts",
+      ".next/types/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      ".next",
+      "supabase/.branches",
+      "supabase/.temp",
+      "**/*.test.ts",
+      "**/*.spec.ts"
+    ]
+  },
+  "requiredScripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run lint"
+  }
+}
