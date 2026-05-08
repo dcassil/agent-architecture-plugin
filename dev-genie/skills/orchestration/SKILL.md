@@ -11,8 +11,12 @@ dev-genie owns no scoring logic, no scaffolds, and no per-stack rules. Its sole 
 
 When invoked (typically by the `/dev-genie-init` command):
 
-1. Optionally read the `project-detection` skill first to gather context (greenfield vs. existing, suggested architecture). Pass that context into the registry walk below.
-2. Walk the **Sub-plugin registry** in order. For each entry:
+1. Read the `project-detection` skill first to classify the repo as `greenfield` vs `existing` and suggest an architecture.
+2. **If `project_kind == existing`**, take the **reconciliation path**:
+   a. Invoke `dev-genie/skills/existing-config-detection/SKILL.md` to produce a structured detection report (lint/ts/format/hook/CI/audit-state/agent-configs+locks).
+   b. Invoke `dev-genie/skills/reconcile/SKILL.md` (which wraps `lib/compare-config.js` + `lib/apply-flow.js`) to produce the per-finding plan, prompt for lock resolutions, and apply the chosen changes. The CLI entry point is `bin/dev-genie-init.mjs`; it accepts `--dry-run` to preview without writing.
+   c. The reconciliation path supersedes the registry walk for existing repos. The registry walk below is for the greenfield path only.
+3. **If `project_kind == greenfield`**, walk the **Sub-plugin registry** in order. For each entry:
    a. Run its **install check**. If already installed, ask the user whether to re-run setup or skip.
    b. Confirm with the user before invoking the setup (especially before any step requiring elevated permissions).
    c. Invoke the **setup command** by reading and following the linked command file.
@@ -51,12 +55,19 @@ To extend dev-genie with a new sub-plugin (e.g. `security-review`, `test-coverag
 
 ## Final-state checklist
 
-After walking the registry, verify the project ends up with:
+After walking the registry (or finishing the reconciliation path), verify the project ends up with:
 
 - [ ] guardrails skills are reachable (the user can invoke `/scaffold-architecture` and the per-architecture skill for their chosen pattern), OR the user explicitly opted out of scaffolding.
 - [ ] An architecture is chosen for the project, or the user explicitly chose to skip.
 - [ ] `.audit/audit.config.json` exists and contains thresholds.
 - [ ] `.audit/audit.results.json` exists with a baseline scan.
 - [ ] A pre-commit hook is installed and runs the audit re-scan on commit.
+
+Additional checks for the **reconciliation path**:
+
+- [ ] Either `eslint.config.guardrails.mjs` (layered) is present OR a managed override block is written in the user's existing eslint config.
+- [ ] All agent-config locks surfaced during reconcile are resolved (skip / lift-temp / lift-perm).
+- [ ] When a CI workflow is present, it runs `lint` and `typecheck`; otherwise dev-genie wrote `.github/workflows/dev-genie-guardrails.yml`.
+- [ ] `.dev-genie/init.last-run.json` exists so re-runs can diff against it.
 
 Report any unchecked item to the user with the specific follow-up command needed (e.g. "re-run `/audit-init`" or "install the `audit` plugin").

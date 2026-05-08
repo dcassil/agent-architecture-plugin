@@ -7,7 +7,7 @@ created_at: 2026-05-08T19:17:48.360851+00:00
 updated_at: 2026-05-08T19:38:24.351963+00:00
 parent: DGEN-I-0005
 blocked_by: []
-archived: false
+archived: true
 
 tags:
   - "#task"
@@ -64,6 +64,8 @@ initiative_id: DGEN-I-0005
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
 
 ## Acceptance Criteria
 

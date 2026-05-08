@@ -1,13 +1,13 @@
 ---
-id: build-interactive-confirm-and
+id: audit-config-reconciliation-detect
 level: task
-title: "Build interactive confirm-and-apply flow with per-group prompts and dry-run mode"
-short_code: "DGEN-T-0024"
-created_at: 2026-05-08T19:17:39.487043+00:00
-updated_at: 2026-05-08T19:31:59.155651+00:00
+title: "Audit-config reconciliation: detect .audit/, baseline, hook; offer to add missing pieces"
+short_code: "DGEN-T-0027"
+created_at: 2026-05-08T19:17:44.873506+00:00
+updated_at: 2026-05-08T19:27:11.933389+00:00
 parent: DGEN-I-0005
 blocked_by: []
-archived: false
+archived: true
 
 tags:
   - "#task"
@@ -19,7 +19,7 @@ strategy_id: NULL
 initiative_id: DGEN-I-0005
 ---
 
-# Build interactive confirm-and-apply flow with per-group prompts and dry-run mode
+# Audit-config reconciliation: detect .audit/, baseline, hook; offer to add missing pieces
 
 *This template includes sections for various types of tasks. Delete sections that don't apply to your specific use case.*
 
@@ -64,6 +64,8 @@ initiative_id: DGEN-I-0005
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
 
 ## Acceptance Criteria
 

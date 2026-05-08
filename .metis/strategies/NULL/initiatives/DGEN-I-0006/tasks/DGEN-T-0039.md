@@ -1,11 +1,11 @@
 ---
-id: build-eslint-effective-config
+id: document-reconciliation-flow-in
 level: task
-title: "Build eslint effective-config resolver using `eslint --print-config`"
-short_code: "DGEN-T-0021"
-created_at: 2026-05-08T19:17:34.919906+00:00
-updated_at: 2026-05-08T19:21:57.088432+00:00
-parent: DGEN-I-0005
+title: "Document reconciliation flow in dev-genie/RECONCILIATION.md"
+short_code: "DGEN-T-0039"
+created_at: 2026-05-08T20:23:41.917941+00:00
+updated_at: 2026-05-08T20:36:24.982270+00:00
+parent: DGEN-I-0006
 blocked_by: []
 archived: false
 
@@ -16,20 +16,24 @@ tags:
 
 exit_criteria_met: false
 strategy_id: NULL
-initiative_id: DGEN-I-0005
+initiative_id: DGEN-I-0006
 ---
 
-# Build eslint effective-config resolver using `eslint --print-config`
+# Document reconciliation flow in dev-genie/RECONCILIATION.md
 
 *This template includes sections for various types of tasks. Delete sections that don't apply to your specific use case.*
 
 ## Parent Initiative **[CONDITIONAL: Assigned Task]**
 
-[[DGEN-I-0005]]
+[[DGEN-I-0006]]
 
-## Objective **[REQUIRED]**
+## Objective
 
-{Clear statement of what this task accomplishes}
+Document the reconciliation flow end-to-end in `dev-genie/RECONCILIATION.md`: detection report shape, classifications, severity tiers, prompt UX, lock resolutions, fenced-block convention, layered eslint config, idempotent re-runs.
+
+## Files
+
+- New: `dev-genie/RECONCILIATION.md`
 
 ## Backlog Item Details **[CONDITIONAL: Backlog Item]**
 
@@ -69,11 +73,11 @@ initiative_id: DGEN-I-0005
 
 ## Acceptance Criteria
 
-## Acceptance Criteria **[REQUIRED]**
+## Acceptance Criteria
 
-- [ ] {Specific, testable requirement 1}
-- [ ] {Specific, testable requirement 2}
-- [ ] {Specific, testable requirement 3}
+- [ ] Doc covers detection report keys, all five classifications, three severity tiers, prompt cadence, lock resolutions, fenced-block convention, layered eslint approach, `--dry-run`, and idempotent re-run via `init.last-run.json`.
+- [ ] Includes a worked example of an "absent-locked" finding being resolved with each of the three lock options.
+- [ ] Cross-links to `existing-config-detection` and `reconcile` skill files.
 
 ## Test Cases **[CONDITIONAL: Testing Task]**
 
@@ -136,6 +140,6 @@ initiative_id: DGEN-I-0005
 ### Risk Considerations
 {Technical risks and mitigation strategies}
 
-## Status Updates **[REQUIRED]**
+## Status Updates
 
-*To be added during implementation*
+- 2026-05-08: Authored `dev-genie/RECONCILIATION.md` covering pipeline, report shape, classifications, severity tiers, apply modes, lock resolution (with worked example for all three options), fenced-block convention, eslint write strategies (layered + managed-block fallback), idempotent re-runs, and cross-references to the relevant skills + libs.

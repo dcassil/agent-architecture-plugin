@@ -1,35 +1,40 @@
 ---
-id: update-dev-genie-init-to-branch-on
+id: bug-report-summary-counts-desync
 level: task
-title: "Update /dev-genie-init to branch on existing-repo path and orchestrate detect→compare→apply"
-short_code: "DGEN-T-0028"
-created_at: 2026-05-08T19:17:46.785788+00:00
-updated_at: 2026-05-08T19:35:03.542341+00:00
-parent: DGEN-I-0005
+title: "Bug: report summary counts desync from rendered group counts after apply"
+short_code: "DGEN-T-0043"
+created_at: 2026-05-08T20:25:02.339418+00:00
+updated_at: 2026-05-08T20:25:02.339418+00:00
+parent: 
 blocked_by: []
 archived: false
 
 tags:
   - "#task"
-  - "#phase/completed"
+  - "#phase/backlog"
+  - "#bug"
 
 
 exit_criteria_met: false
 strategy_id: NULL
-initiative_id: DGEN-I-0005
+initiative_id: NULL
 ---
 
-# Update /dev-genie-init to branch on existing-repo path and orchestrate detect→compare→apply
+# Bug: report summary counts desync from rendered group counts after apply
 
-*This template includes sections for various types of tasks. Delete sections that don't apply to your specific use case.*
+## Objective
 
-## Parent Initiative **[CONDITIONAL: Assigned Task]**
+Reconcile the post-apply summary counts in `dev-genie/lib/apply-flow.js` / `report.js` so the headline `applied/skipped/errors` matches the rendered group counts. Observed during DGEN-T-0029 dogfood: after `auto-critical`, the summary line and the per-group rendered counts disagreed.
 
-[[DGEN-I-0005]]
+## Likely cause
 
-## Objective **[REQUIRED]**
+`applyFindings` is counting at one grain (per-finding) while the report renderer summarizes at a different grain (per-group, or after deduping by category). Or: findings with `present` status are filtered in one path and not the other.
 
-{Clear statement of what this task accomplishes}
+## Acceptance criteria
+
+- [ ] Summary `applied + skipped + errors` equals the total rendered findings for the run.
+- [ ] Summary breakdowns by severity/category match `formatReport` output.
+- [ ] Unit test asserts the invariant on a synthesized findings list.
 
 ## Backlog Item Details **[CONDITIONAL: Backlog Item]**
 
@@ -64,10 +69,6 @@ initiative_id: DGEN-I-0005
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
-
-## Acceptance Criteria
-
-## Acceptance Criteria
 
 ## Acceptance Criteria **[REQUIRED]**
 

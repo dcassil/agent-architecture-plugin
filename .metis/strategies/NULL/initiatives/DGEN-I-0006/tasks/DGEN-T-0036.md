@@ -1,11 +1,11 @@
 ---
-id: build-config-detection-module-scan
+id: author-reconcile-skill-with-prompt
 level: task
-title: "Build config-detection module: scan repo for lint/type/format/hook/CI/audit config"
-short_code: "DGEN-T-0019"
-created_at: 2026-05-08T19:17:31.858413+00:00
-updated_at: 2026-05-08T19:20:39.938505+00:00
-parent: DGEN-I-0005
+title: "Author reconcile SKILL with prompt UX and lock resolution"
+short_code: "DGEN-T-0036"
+created_at: 2026-05-08T20:23:38.539507+00:00
+updated_at: 2026-05-08T20:33:31.195451+00:00
+parent: DGEN-I-0006
 blocked_by: []
 archived: false
 
@@ -16,20 +16,25 @@ tags:
 
 exit_criteria_met: false
 strategy_id: NULL
-initiative_id: DGEN-I-0005
+initiative_id: DGEN-I-0006
 ---
 
-# Build config-detection module: scan repo for lint/type/format/hook/CI/audit config
+# Author reconcile SKILL with prompt UX and lock resolution
 
 *This template includes sections for various types of tasks. Delete sections that don't apply to your specific use case.*
 
 ## Parent Initiative **[CONDITIONAL: Assigned Task]**
 
-[[DGEN-I-0005]]
+[[DGEN-I-0006]]
 
-## Objective **[REQUIRED]**
+## Objective
 
-{Clear statement of what this task accomplishes}
+Author `dev-genie/skills/reconcile/SKILL.md` that documents the prompt UX (per-group default, per-finding for critical and locks), the lock-resolution choices (skip / lift-temporarily / lift-permanently-and-update-agent-config), and how it consumes the detection report + baseline to produce the plan. The skill is the human-facing wrapper around `lib/compare-config.js`, `lib/report.js`, and `lib/apply-flow.js`.
+
+## Files
+
+- New: `dev-genie/skills/reconcile/SKILL.md`
+- Edit: `dev-genie/lib/apply-flow.js` to add lock-resolution branch when a finding is `absent-and-file-locked`
 
 ## Backlog Item Details **[CONDITIONAL: Backlog Item]**
 
@@ -69,11 +74,13 @@ initiative_id: DGEN-I-0005
 
 ## Acceptance Criteria
 
-## Acceptance Criteria **[REQUIRED]**
+## Acceptance Criteria
 
-- [ ] {Specific, testable requirement 1}
-- [ ] {Specific, testable requirement 2}
-- [ ] {Specific, testable requirement 3}
+- [ ] `dev-genie/skills/reconcile/SKILL.md` exists with frontmatter and explains: classifications (equivalent / weaker / conflicting / absent-unlocked / absent-locked), severity tiers (critical / recommended / optional), prompt cadence rules.
+- [ ] Documents the three lock resolutions and their effect on the agent file (no change / temp-lift no-write / replace fenced block + rewrite lock language).
+- [ ] `apply-flow.js` recognizes `classification === 'absent-locked'` and routes to a lock-resolution prompt, then either skips, proceeds, or proceeds AND calls `liftLock()` from the agent-config-writer.
+- [ ] The skill cross-links to `existing-config-detection` and to `apply-flow.js`.
+- [ ] No new third-party deps added.
 
 ## Test Cases **[CONDITIONAL: Testing Task]**
 
@@ -136,6 +143,6 @@ initiative_id: DGEN-I-0005
 ### Risk Considerations
 {Technical risks and mitigation strategies}
 
-## Status Updates **[REQUIRED]**
+## Status Updates
 
-*To be added during implementation*
+- 2026-05-08: Authored `dev-genie/skills/reconcile/SKILL.md`. Added lock-resolution branch to `apply-flow.js`: looks up `findLockForPath` for each finding's target, prompts in interactive mode (skip / lift-temp / lift-perm) and defaults to skip in non-interactive modes. `lift-perm` calls `liftLock()` to comment out the lock language post-apply. Module loads cleanly.

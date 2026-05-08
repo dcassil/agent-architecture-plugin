@@ -11,10 +11,14 @@ You are running the dev-genie one-time bootstrap flow. dev-genie owns no scoring
    **Branch on project_kind.** If `project_kind == existing` (any of eslint / tsconfig / scripts / hooks already present), take the **existing-repo branch**: invoke the bin script and stop after it returns:
 
    ```
-   node ${CLAUDE_PLUGIN_ROOT}/bin/dev-genie-init.mjs --repo <cwd> [--arch <id>] [--mode <mode>]
+   node ${CLAUDE_PLUGIN_ROOT}/bin/dev-genie-init.mjs --repo <cwd> [--arch <id>] [--mode <mode>] [--dry-run]
    ```
 
-   (or `node dev-genie/bin/dev-genie-init.mjs ...` outside plugin mode). The script orchestrates `detectConfig → compareConfig → formatReport → applyFindings`, prompts the user for arch (when `confidence != high`) and apply mode (`dry-run | auto-critical | interactive | apply-all | quit`), and prints the final applied/skipped/errors summary. Pass `--dry-run` if the user only wants a preview.
+   (or `node dev-genie/bin/dev-genie-init.mjs ...` outside plugin mode). The script orchestrates `detectConfig → compareConfig → formatReport → applyFindings`, persists the resolved plan to `.dev-genie/init.last-run.json` for idempotent re-runs, prompts the user for arch (when `confidence != high`) and apply mode (`dry-run | auto-critical | interactive | apply-all | quit`), and prints the final applied/skipped/errors summary. Pass `--dry-run` for a no-write preview.
+
+   The bin script delegates to two skills:
+   - `dev-genie/skills/existing-config-detection/SKILL.md` — read-only detection (lint/ts/format/hook/CI/audit-state/agent-configs+locks).
+   - `dev-genie/skills/reconcile/SKILL.md` — comparator, lock-resolution prompts, fenced-block writer, layered eslint config writer, and apply.
 
    For the **greenfield branch** (`project_kind == greenfield` — no manifests, no eslint/tsconfig/scripts/hooks), continue with the original orchestration steps below.
 

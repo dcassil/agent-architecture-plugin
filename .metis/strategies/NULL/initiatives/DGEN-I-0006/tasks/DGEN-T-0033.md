@@ -1,11 +1,11 @@
 ---
-id: detect-wire-pre-commit-enforcement
+id: plan-serializer-to-dev-genie-init
 level: task
-title: "Detect + wire pre-commit enforcement (Husky/lefthook/pre-commit) for lint+typecheck+audit"
-short_code: "DGEN-T-0025"
-created_at: 2026-05-08T19:17:41.449363+00:00
-updated_at: 2026-05-08T19:23:34.665649+00:00
-parent: DGEN-I-0005
+title: "Plan serializer to .dev-genie/init.last-run.json"
+short_code: "DGEN-T-0033"
+created_at: 2026-05-08T20:23:34.649047+00:00
+updated_at: 2026-05-08T20:29:52.247481+00:00
+parent: DGEN-I-0006
 blocked_by: []
 archived: false
 
@@ -16,20 +16,26 @@ tags:
 
 exit_criteria_met: false
 strategy_id: NULL
-initiative_id: DGEN-I-0005
+initiative_id: DGEN-I-0006
 ---
 
-# Detect + wire pre-commit enforcement (Husky/lefthook/pre-commit) for lint+typecheck+audit
+# Plan serializer to .dev-genie/init.last-run.json
 
 *This template includes sections for various types of tasks. Delete sections that don't apply to your specific use case.*
 
 ## Parent Initiative **[CONDITIONAL: Assigned Task]**
 
-[[DGEN-I-0005]]
+[[DGEN-I-0006]]
 
-## Objective **[REQUIRED]**
+## Objective
 
-{Clear statement of what this task accomplishes}
+Serialize the resolved init plan + apply summary to `.dev-genie/init.last-run.json` so re-runs can diff against the prior state and prompt only on real changes.
+
+## Files
+
+- New: `dev-genie/lib/plan-store.js` (load/save helpers)
+- Wire into: `dev-genie/bin/dev-genie-init.mjs` (write at end of run; read at start of run)
+- Tests: `dev-genie/lib/plan-store.test.mjs`
 
 ## Backlog Item Details **[CONDITIONAL: Backlog Item]**
 
@@ -69,11 +75,13 @@ initiative_id: DGEN-I-0005
 
 ## Acceptance Criteria
 
-## Acceptance Criteria **[REQUIRED]**
+## Acceptance Criteria
 
-- [ ] {Specific, testable requirement 1}
-- [ ] {Specific, testable requirement 2}
-- [ ] {Specific, testable requirement 3}
+- [ ] On run completion, write `.dev-genie/init.last-run.json` containing `{ schemaVersion, timestamp, repoFingerprint, plan: [...findings], applied: [...], skipped: [...], errors: [...] }`.
+- [ ] Creates `.dev-genie/` if missing; appends an entry to `.gitignore` for the `.dev-genie/` directory if not already ignored (with user confirmation in interactive mode).
+- [ ] On run start, if file exists, load it and pass to comparator so unchanged findings can be marked "no change since last run" and skipped from prompts in interactive mode.
+- [ ] Dry-run still writes a `.dev-genie/init.last-run.json` with `applied: []` if `--write-plan` flag passed; otherwise skips writing.
+- [ ] Tests cover: first run (no prior file), re-run unchanged, re-run with new finding, re-run after user manually edited config (fingerprint mismatch).
 
 ## Test Cases **[CONDITIONAL: Testing Task]**
 
@@ -136,6 +144,6 @@ initiative_id: DGEN-I-0005
 ### Risk Considerations
 {Technical risks and mitigation strategies}
 
-## Status Updates **[REQUIRED]**
+## Status Updates
 
-*To be added during implementation*
+- 2026-05-08: Implemented `dev-genie/lib/plan-store.js` (load/save/fingerprint/diffPlan/ensureGitignore). Wired into `bin/dev-genie-init.mjs` to load prior run, annotate diff, and save on non-dry-run completion. 6/6 tests pass.

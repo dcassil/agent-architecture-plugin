@@ -36,6 +36,7 @@ const { detectConfig } = require('../skills/project-detection/detect-config.js')
 const { compareConfig } = require('../lib/compare-config.js');
 const { formatReport, formatSummary, toJSON } = require('../lib/report.js');
 const { applyFindings } = require('../lib/apply-flow.js');
+const { saveLastRun, loadLastRun, ensureGitignore, diffPlan } = require('../lib/plan-store.js');
 const { listArchitectures } = await import('../baselines/index.mjs');
 
 const VALID_MODES = new Set(['dry-run', 'auto-critical', 'interactive', 'apply-all', 'quit']);
@@ -205,6 +206,16 @@ async function main() {
   }
   const enriched = findings.map((f) => enrichedById.get(f.id) || f);
 
+  // Idempotent re-run: load prior plan and annotate which findings are new.
+  const lastRun = loadLastRun(args.repo);
+  if (lastRun) {
+    const { newFindings, unchanged } = diffPlan(enriched, lastRun);
+    process.stdout.write(
+      `[dev-genie] prior run found at .dev-genie/init.last-run.json (${lastRun.timestamp}); ` +
+        `${newFindings.length} new finding(s), ${unchanged.length} unchanged.\n`,
+    );
+  }
+
   process.stdout.write('\n' + formatReport(enriched) + '\n');
   process.stdout.write('\n' + formatSummary(enriched) + '\n');
 
@@ -232,6 +243,19 @@ async function main() {
   if (result.errors.length) {
     for (const e of result.errors) process.stdout.write(`  ERROR ${e.id}: ${e.message}\n`);
   }
+
+  // Persist the resolved plan so re-runs can prompt only on real changes.
+  // Skip writing on dry-run unless explicitly requested (out of scope for now).
+  if (mode !== 'dry-run') {
+    try {
+      ensureGitignore(args.repo);
+      saveLastRun(args.repo, { plan: enriched, applied: result.applied, skipped: result.skipped, errors: result.errors, extra: { archId, mode } });
+      process.stdout.write('[dev-genie] wrote .dev-genie/init.last-run.json\n');
+    } catch (e) {
+      process.stdout.write(`[dev-genie] warning: could not write last-run.json: ${e.message}\n`);
+    }
+  }
+
   if (args.json) {
     process.stdout.write(JSON.stringify({ branch: 'existing', archId, mode, ...result }) + '\n');
   }

@@ -248,6 +248,44 @@ async function readSafe(p) {
   }
 }
 
+// ---------- lock resolution ---------------------------------------------
+
+// Map of finding category → repo-relative target path used to look up locks.
+function targetPathForFinding(finding) {
+  if (!finding) return null;
+  if (finding.diff && finding.diff.target) {
+    if (typeof finding.diff.target === 'string') return finding.diff.target;
+  }
+  if (finding.category === 'eslint') return 'eslint.config.mjs';
+  if (finding.category === 'tsconfig' || finding.category === 'typescript') return 'tsconfig.json';
+  if (finding.category === 'package' || finding.category === 'scripts') return 'package.json';
+  return null;
+}
+
+let _agentConfigCache = null;
+function loadAgentConfigs(repoPath) {
+  if (_agentConfigCache && _agentConfigCache.repo === repoPath) return _agentConfigCache.data;
+  try {
+    const { detectAgentConfig } = require('../skills/project-detection/detect-agent-config.js');
+    const data = detectAgentConfig(repoPath);
+    _agentConfigCache = { repo: repoPath, data };
+    return data;
+  } catch {
+    return [];
+  }
+}
+
+function findLockForFinding(repoPath, finding) {
+  const target = targetPathForFinding(finding);
+  if (!target) return null;
+  try {
+    const { findLockForPath } = require('../skills/project-detection/detect-agent-config.js');
+    return findLockForPath(loadAgentConfigs(repoPath), target);
+  } catch {
+    return null;
+  }
+}
+
 // ---------- public: applyFinding ----------------------------------------
 
 async function applyFinding(repoPath, finding) {
@@ -391,6 +429,50 @@ async function applyFindings({ repoPath, archId, findings, mode }) {
     (f) => !(f.diff && f.diff.kind === 'string' && f.category === 'eslint'),
   );
 
+  // Lock resolution: for each finding whose target file is locked by an agent
+  // config, prompt for skip / lift-temporarily / lift-permanently. In
+  // non-interactive modes (apply-all / auto-critical), default to SKIP — never
+  // silently lift a lock.
+  const lockedItems = [];
+  const lockResolutions = new Map(); // finding.id → 'skip'|'lift-temp'|'lift-perm'
+  for (const f of toApply) {
+    const lock = findLockForFinding(repoPath, f);
+    if (lock) lockedItems.push({ finding: f, lock });
+  }
+  if (lockedItems.length > 0) {
+    if (mode === 'interactive') {
+      const rl = readline.createInterface({ input, output });
+      try {
+        for (const { finding, lock } of lockedItems) {
+          process.stdout.write(`\n[lock] ${finding.id} target is locked by ${lock.agentFile}: "${lock.reason}"\n`);
+          const ans = await prompt(rl, `  resolve: [s]kip / [t]emp-lift / [p]erm-lift+rewrite: `);
+          if (ans === 't' || ans === 'temp' || ans === 'temp-lift') lockResolutions.set(finding.id, 'lift-temp');
+          else if (ans === 'p' || ans === 'perm' || ans === 'perm-lift') lockResolutions.set(finding.id, 'lift-perm');
+          else lockResolutions.set(finding.id, 'skip');
+        }
+      } finally {
+        rl.close();
+      }
+    } else {
+      for (const { finding, lock } of lockedItems) {
+        lockResolutions.set(finding.id, 'skip');
+        process.stdout.write(`[lock] skipping ${finding.id} (locked by ${lock.agentFile}); use --mode interactive to resolve.\n`);
+      }
+    }
+  }
+  // Drop skipped-locked findings from toApply; collect for later perm-lift.
+  const permLifts = [];
+  toApply = toApply.filter((f) => {
+    const r = lockResolutions.get(f.id);
+    if (r === undefined) return true;
+    if (r === 'skip') { skipped.push(f.id); return false; }
+    if (r === 'lift-perm') {
+      const lock = findLockForFinding(repoPath, f);
+      if (lock) permLifts.push({ finding: f, lock });
+    }
+    return true; // lift-temp and lift-perm both proceed with the apply
+  });
+
   process.stdout.write(`\n[dev-genie] applying ${toApply.length} finding(s)...\n`);
 
   if (eslintRuleFindings.length > 0) {
@@ -409,6 +491,20 @@ async function applyFindings({ repoPath, archId, findings, mode }) {
     process.stdout.write(`  ${f.id}: ${res.ok ? 'OK' : 'ERROR'} — ${res.message.split('\n')[0]}\n`);
     if (res.ok) applied.push(f.id);
     else errors.push({ id: f.id, message: res.message });
+  }
+
+  // Permanent lift: rewrite the lock language in the agent file(s).
+  if (permLifts.length > 0) {
+    try {
+      const { liftLock } = require('./agent-config-writer.js');
+      for (const { lock } of permLifts) {
+        const agentPath = path.join(repoPath, lock.agentFile);
+        const r = liftLock(agentPath, lock.pattern);
+        process.stdout.write(`  [lock] permanently lifted "${lock.pattern}" in ${lock.agentFile}: ${r.changed ? 'updated' : 'no-op'}\n`);
+      }
+    } catch (e) {
+      process.stdout.write(`  [lock] perm-lift error: ${e.message}\n`);
+    }
   }
 
   process.stdout.write(

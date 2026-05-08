@@ -1,13 +1,13 @@
 ---
-id: detect-wire-build-ci-enforcement
+id: build-config-detection-module-scan
 level: task
-title: "Detect + wire build/CI enforcement: package.json scripts and GitHub Actions workflow"
-short_code: "DGEN-T-0026"
-created_at: 2026-05-08T19:17:42.971331+00:00
-updated_at: 2026-05-08T19:22:22.543261+00:00
+title: "Build config-detection module: scan repo for lint/type/format/hook/CI/audit config"
+short_code: "DGEN-T-0019"
+created_at: 2026-05-08T19:17:31.858413+00:00
+updated_at: 2026-05-08T19:20:39.938505+00:00
 parent: DGEN-I-0005
 blocked_by: []
-archived: false
+archived: true
 
 tags:
   - "#task"
@@ -19,7 +19,7 @@ strategy_id: NULL
 initiative_id: DGEN-I-0005
 ---
 
-# Detect + wire build/CI enforcement: package.json scripts and GitHub Actions workflow
+# Build config-detection module: scan repo for lint/type/format/hook/CI/audit config
 
 *This template includes sections for various types of tasks. Delete sections that don't apply to your specific use case.*
 
@@ -64,6 +64,8 @@ initiative_id: DGEN-I-0005
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
 
 ## Acceptance Criteria
 

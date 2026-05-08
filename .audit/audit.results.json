@@ -1,11 +1,10 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-05-08T19:57:38.737Z",
+  "timestamp": "2026-05-08T20:38:33.986Z",
   "composites": {
     "architecture": 100,
-    "maintainability": 83.04,
-    "testability": 81.14,
-    "health": 87.69
+    "maintainability": 80.56,
+    "testability": 70.86,
+    "health": 83.2
   },
   "dominant": {
     "architecture": "cycles",
@@ -20,35 +19,35 @@
       "roots": 100
     },
     "maintainability": {
-      "avgLoc": 54.17,
+      "avgLoc": 52.22,
       "p90Loc": 100,
-      "edges": 96.34,
+      "edges": 89.15,
       "orphan": 100
     },
     "testability": {
-      "fan": 37.14,
+      "fan": 2.86,
       "avgComplexity": 100,
       "maxComplexity": 100,
       "circularRate": 100,
       "depth": 100
     }
   },
-  "scaleByLOC": 84.32,
+  "scaleByLOC": 77.71,
   "scanMetrics": {
     "cycles": 0,
     "depth": 1,
-    "roots": 0.24390243902439024,
-    "avgLoc": 237.49,
-    "p90Loc": 98.35,
-    "edges": 2.292682926829268,
+    "roots": 0.3018867924528302,
+    "avgLoc": 243.34,
+    "p90Loc": 99.21,
+    "edges": 2.8679245283018866,
     "orphan": 0,
-    "fan": 27,
+    "fan": 39,
     "avgComplexity": 0,
     "maxComplexity": 0,
     "circularRate": 0,
-    "totalLoc": 9737,
+    "totalLoc": 12897,
     "_meta": {
-      "wallMs": 322,
+      "wallMs": 450,
       "srcGlobs": [
         "audit",
         "guardrails",

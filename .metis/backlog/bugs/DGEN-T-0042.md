@@ -1,35 +1,50 @@
 ---
-id: audit-config-reconciliation-detect
+id: bug-pre-commit-installer-rejects
 level: task
-title: "Audit-config reconciliation: detect .audit/, baseline, hook; offer to add missing pieces"
-short_code: "DGEN-T-0027"
-created_at: 2026-05-08T19:17:44.873506+00:00
-updated_at: 2026-05-08T19:27:11.933389+00:00
-parent: DGEN-I-0005
+title: "Bug: pre-commit installer rejects `simple-git-hooks + lint-staged` system from universal baseline"
+short_code: "DGEN-T-0042"
+created_at: 2026-05-08T20:25:01.046264+00:00
+updated_at: 2026-05-08T20:25:01.046264+00:00
+parent: 
 blocked_by: []
 archived: false
 
 tags:
   - "#task"
-  - "#phase/completed"
+  - "#phase/backlog"
+  - "#bug"
 
 
 exit_criteria_met: false
 strategy_id: NULL
-initiative_id: DGEN-I-0005
+initiative_id: NULL
 ---
 
-# Audit-config reconciliation: detect .audit/, baseline, hook; offer to add missing pieces
+# Bug: pre-commit installer rejects `simple-git-hooks + lint-staged` system from universal baseline
 
-*This template includes sections for various types of tasks. Delete sections that don't apply to your specific use case.*
+## Objective
 
-## Parent Initiative **[CONDITIONAL: Assigned Task]**
+Teach the pre-commit installer (`dev-genie/scripts/lib/pre-commit.mjs` `installPreCommitHooks`) to handle `system: "simple-git-hooks + lint-staged"` — that is the system named in the universal baseline (`dev-genie/baselines/universal.json` enforcementPoints) and the apply-flow currently throws `unknown system "simple-git-hooks + lint-staged"`, so every existing-repo init logs 1 error per repo.
 
-[[DGEN-I-0005]]
+DGEN-T-0027's refactor already added *detection* for simple-git-hooks; this is the missing *install* path.
 
-## Objective **[REQUIRED]**
+## Source
 
-{Clear statement of what this task accomplishes}
+DGEN-T-0029 dogfood — both synthesized repos hit this on auto-critical apply.
+
+## Fix sketch
+
+- Recognize the compound system name (split on `+`, trim, allow either or both halves).
+- Install path for `simple-git-hooks`: write/merge `package.json#simple-git-hooks` with a `pre-commit` entry (e.g. `"npx lint-staged"` or chained commands), idempotently. Run `npx simple-git-hooks` to materialize the git hook (or instruct user).
+- Install path for `lint-staged`: merge `package.json#lint-staged` with the requested commands per glob (likely `"*.{ts,tsx,js,mjs}": ["eslint --fix"]`), idempotently.
+- Reuse the sentinel-block strategy used for husky/raw hooks where applicable.
+
+## Acceptance criteria
+
+- [ ] `installPreCommitHooks(repo, { system: 'simple-git-hooks + lint-staged', commands })` succeeds on a repo with no prior pre-commit setup.
+- [ ] Idempotent — re-run is a no-op.
+- [ ] Existing user `simple-git-hooks` / `lint-staged` config is merged, not overwritten, unless caller passes an allow-overwrite flag.
+- [ ] Smoke test in `pre-commit.test.mjs`.
 
 ## Backlog Item Details **[CONDITIONAL: Backlog Item]**
 
@@ -64,10 +79,6 @@ initiative_id: DGEN-I-0005
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
-
-## Acceptance Criteria
-
-## Acceptance Criteria
 
 ## Acceptance Criteria **[REQUIRED]**
 

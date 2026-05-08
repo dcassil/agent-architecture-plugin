@@ -7,7 +7,7 @@ created_at: 2026-05-08T19:15:48.221718+00:00
 updated_at: 2026-05-08T19:19:23.762781+00:00
 parent: DGEN-V-0001
 blocked_by: []
-archived: false
+archived: true
 
 tags:
   - "#initiative"

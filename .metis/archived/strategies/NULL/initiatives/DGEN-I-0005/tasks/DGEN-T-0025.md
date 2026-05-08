@@ -1,13 +1,13 @@
 ---
-id: build-report-generator-human
+id: detect-wire-pre-commit-enforcement
 level: task
-title: "Build report generator: human-readable findings with rationale and exact change diff"
-short_code: "DGEN-T-0023"
-created_at: 2026-05-08T19:17:37.964468+00:00
-updated_at: 2026-05-08T19:29:17.785164+00:00
+title: "Detect + wire pre-commit enforcement (Husky/lefthook/pre-commit) for lint+typecheck+audit"
+short_code: "DGEN-T-0025"
+created_at: 2026-05-08T19:17:41.449363+00:00
+updated_at: 2026-05-08T19:23:34.665649+00:00
 parent: DGEN-I-0005
 blocked_by: []
-archived: false
+archived: true
 
 tags:
   - "#task"
@@ -19,7 +19,7 @@ strategy_id: NULL
 initiative_id: DGEN-I-0005
 ---
 
-# Build report generator: human-readable findings with rationale and exact change diff
+# Detect + wire pre-commit enforcement (Husky/lefthook/pre-commit) for lint+typecheck+audit
 
 *This template includes sections for various types of tasks. Delete sections that don't apply to your specific use case.*
 
@@ -64,6 +64,8 @@ initiative_id: DGEN-I-0005
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
 
 ## Acceptance Criteria
 

@@ -1,11 +1,11 @@
 ---
-id: extract-recommended-baselines-from
+id: fenced-block-writer-for-agent
 level: task
-title: "Extract recommended baselines from arch-* + universal-guard-rails into queryable form"
-short_code: "DGEN-T-0020"
-created_at: 2026-05-08T19:17:33.783226+00:00
-updated_at: 2026-05-08T19:23:14.340679+00:00
-parent: DGEN-I-0005
+title: "Fenced-block writer for agent config files"
+short_code: "DGEN-T-0031"
+created_at: 2026-05-08T20:23:32.365401+00:00
+updated_at: 2026-05-08T20:28:03.629979+00:00
+parent: DGEN-I-0006
 blocked_by: []
 archived: false
 
@@ -16,20 +16,26 @@ tags:
 
 exit_criteria_met: false
 strategy_id: NULL
-initiative_id: DGEN-I-0005
+initiative_id: DGEN-I-0006
 ---
 
-# Extract recommended baselines from arch-* + universal-guard-rails into queryable form
+# Fenced-block writer for agent config files
 
 *This template includes sections for various types of tasks. Delete sections that don't apply to your specific use case.*
 
 ## Parent Initiative **[CONDITIONAL: Assigned Task]**
 
-[[DGEN-I-0005]]
+[[DGEN-I-0006]]
 
-## Objective **[REQUIRED]**
+## Objective
 
-{Clear statement of what this task accomplishes}
+Implement a fenced-block writer for agent config files that wraps dev-genie's contributions in `<!-- dev-genie:guardrails:begin -->` / `<!-- dev-genie:guardrails:end -->` markers. Re-runs replace the block contents in place; never touch text outside the fence.
+
+## Files
+
+- New: `dev-genie/lib/agent-config-writer.js`
+- Tests: `dev-genie/lib/agent-config-writer.test.mjs`
+- Consumed by: `dev-genie/lib/apply-flow.js`
 
 ## Backlog Item Details **[CONDITIONAL: Backlog Item]**
 
@@ -69,11 +75,14 @@ initiative_id: DGEN-I-0005
 
 ## Acceptance Criteria
 
-## Acceptance Criteria **[REQUIRED]**
+## Acceptance Criteria
 
-- [ ] {Specific, testable requirement 1}
-- [ ] {Specific, testable requirement 2}
-- [ ] {Specific, testable requirement 3}
+- [ ] `writeAgentBlock(filePath, body)` creates the file with the fenced block if absent.
+- [ ] If file exists with no fence, appends the fenced block after the last newline.
+- [ ] If fence already exists, replaces only the contents between the markers, preserving surrounding text exactly.
+- [ ] Idempotent: writing the same body twice produces no diff and returns `{ ok: true, changed: false }`.
+- [ ] Provides `liftLock(filePath, lockPattern)` helper that comments out or rewrites a detected lock line referencing a given pattern (used when user picks "lift-permanently").
+- [ ] Tests cover: new file, existing file no fence, existing fence with same content (no-op), existing fence with different content (replace), file with multiple unrelated HTML comments.
 
 ## Test Cases **[CONDITIONAL: Testing Task]**
 
@@ -136,6 +145,6 @@ initiative_id: DGEN-I-0005
 ### Risk Considerations
 {Technical risks and mitigation strategies}
 
-## Status Updates **[REQUIRED]**
+## Status Updates
 
-*To be added during implementation*
+- 2026-05-08: Implemented `dev-genie/lib/agent-config-writer.js` with `writeAgentBlock` (create/append/replace/noop) and `liftLock` helper. 7/7 tests pass.

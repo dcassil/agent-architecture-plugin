@@ -4,6 +4,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { detectAgentConfig } = require('./detect-agent-config.js');
 
 function exists(p) {
   try { fs.accessSync(p); return true; } catch { return false; }
@@ -105,6 +106,10 @@ function detectHooks(repo) {
   }
   return {
     found: files.length > 0,
+    husky: notes.includes('husky'),
+    lefthook: notes.includes('lefthook'),
+    preCommitFramework: notes.includes('pre-commit'),
+    nativePreCommit: notes.includes('raw git pre-commit hook'),
     files,
     notes: notes.length ? notes.join(', ') : 'no git hooks configured',
   };
@@ -156,9 +161,38 @@ function detectScripts(pkg) {
 
 function detectAudit(repo) {
   const dir = path.join(repo, '.audit');
-  if (!exists(dir)) return { found: false, files: [], notes: 'no .audit/ directory' };
+  const hasDir = exists(dir);
+  const baseline = path.join(dir, 'audit.config.json');
+  const hasBaseline = hasDir && exists(baseline);
+  // Hook detection: any pre-commit file (husky / lefthook / native git) that
+  // mentions "audit". Lightweight string-sniff is sufficient.
+  let hasHook = false;
+  const hookCandidates = [
+    path.join(repo, '.husky', 'pre-commit'),
+    path.join(repo, '.git', 'hooks', 'pre-commit'),
+    path.join(repo, 'lefthook.yml'),
+    path.join(repo, 'lefthook.yaml'),
+    path.join(repo, '.pre-commit-config.yaml'),
+  ];
+  for (const f of hookCandidates) {
+    if (!exists(f)) continue;
+    try {
+      const raw = fs.readFileSync(f, 'utf8');
+      if (/\baudit\b/.test(raw)) { hasHook = true; break; }
+    } catch {}
+  }
+  if (!hasDir) {
+    return { found: false, hasDir: false, hasBaseline: false, hasHook, files: [], notes: 'no .audit/ directory' };
+  }
   const files = listDir(dir, { recursive: true }).map((f) => path.relative(repo, f));
-  return { found: true, files, notes: `.audit/ present (${files.length} file(s))` };
+  return {
+    found: true,
+    hasDir: true,
+    hasBaseline,
+    hasHook,
+    files,
+    notes: `.audit/ present (${files.length} file(s)); baseline=${hasBaseline} hook=${hasHook}`,
+  };
 }
 
 function detectPackageManager(repo) {
@@ -199,6 +233,8 @@ function detectConfig(repoPath) {
     scripts: detectScripts(pkg),
     audit: detectAudit(repo),
     packageManager: detectPackageManager(repo),
+    agentConfigs: detectAgentConfig(repo),
+    packageScripts: (pkg && pkg.scripts) || {},
   };
 }
 

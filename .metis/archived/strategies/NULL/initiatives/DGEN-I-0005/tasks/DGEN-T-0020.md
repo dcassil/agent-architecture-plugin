@@ -1,13 +1,13 @@
 ---
-id: build-comparator-diff-detected-vs
+id: extract-recommended-baselines-from
 level: task
-title: "Build comparator: diff detected vs baseline (missing/weaker/conflicting) with severity grouping"
-short_code: "DGEN-T-0022"
-created_at: 2026-05-08T19:17:36.469114+00:00
-updated_at: 2026-05-08T19:26:22.925879+00:00
+title: "Extract recommended baselines from arch-* + universal-guard-rails into queryable form"
+short_code: "DGEN-T-0020"
+created_at: 2026-05-08T19:17:33.783226+00:00
+updated_at: 2026-05-08T19:23:14.340679+00:00
 parent: DGEN-I-0005
 blocked_by: []
-archived: false
+archived: true
 
 tags:
   - "#task"
@@ -19,7 +19,7 @@ strategy_id: NULL
 initiative_id: DGEN-I-0005
 ---
 
-# Build comparator: diff detected vs baseline (missing/weaker/conflicting) with severity grouping
+# Extract recommended baselines from arch-* + universal-guard-rails into queryable form
 
 *This template includes sections for various types of tasks. Delete sections that don't apply to your specific use case.*
 
@@ -64,6 +64,8 @@ initiative_id: DGEN-I-0005
 - **Current Problems**: {What's difficult/slow/buggy now}
 - **Benefits of Fixing**: {What improves after refactoring}
 - **Risk Assessment**: {Risks of not addressing this}
+
+## Acceptance Criteria
 
 ## Acceptance Criteria
 
