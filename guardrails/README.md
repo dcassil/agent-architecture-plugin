@@ -4,6 +4,7 @@ The **guardrails** plugin is one plugin in the **dev-genie** ecosystem. It owns 
 
 - **Architecture pattern catalog** under `architectures/` — Next.js + Vercel, Node API, Supabase, and Supabase RAG (pgvector). Each pattern ships an architecture spec (`README.md`) plus starter `eslint.config.mjs` and `tsconfig.json` that encode the spec into automated checks.
 - **`/scaffold-architecture` slash command** — copies a chosen pattern's `eslint.config.mjs` + `tsconfig.json` into a target project, surfaces the spec for confirmation, and prints peer-dep install commands.
+- **`/guardrails-add-edit-hook` slash command** — top-up for repos that already ran `/scaffold-architecture` before the edit-time ESLint hook shipped. Copies `guardrails/scripts/lint-edited-file.sh` into the target and merges the `PostToolUse` entry into `<target>/.claude/settings.json` via `dev-genie/lib/claude-settings-merger.mjs`. Idempotent. Same mechanism as Setup C in the `universal-guard-rails` skill.
 - **Per-stack guard-rail skills**:
   - `guard-rails-catalog` — index of available architectures and routing to the matching `arch-*` skill.
   - `arch-next-vercel`, `arch-node-api`, `arch-supabase-api`, `arch-supabase-node-rag` — per-architecture rules and copy steps.
@@ -32,6 +33,7 @@ guardrails/
 │   ├── supabase-api/
 │   └── supabase-node-rag/
 ├── commands/
+│   ├── guardrails-add-edit-hook.md
 │   └── scaffold-architecture.md
 └── skills/
     ├── arch-next-vercel/

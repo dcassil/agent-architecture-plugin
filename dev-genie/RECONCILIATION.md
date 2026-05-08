@@ -119,6 +119,22 @@ Optional `rewriteEntryPoint` rewrites the user's config to a one-liner that re-e
 
 `dev-genie/lib/apply-flow.js#writeEslintManagedBlock` writes a sentinel-fenced override into the user's existing config. This is the fallback path for legacy `.eslintrc.json` and friends.
 
+## `.claude/settings.json` (Claude Code hooks)
+
+Separate from the eslint/tsconfig/agent-config writers above, dev-genie can also reconcile a managed `PostToolUse` hook entry in `.claude/settings.json` for the edit-time ESLint feature (initiative `DGEN-I-0008`). The merger lives at `dev-genie/lib/claude-settings-merger.mjs` and is invokable as a CLI:
+
+```
+node dev-genie/lib/claude-settings-merger.mjs --repo <target>
+```
+
+**Managed-entry detection.** The merger uses the literal `command` value `guardrails/scripts/lint-edited-file.sh` as its idempotency key. On re-run, any existing `PostToolUse` hook whose `command` matches that string is treated as already-managed and is left untouched (or updated in place) rather than appended a second time. Other unrelated `PostToolUse` entries in the user's `.claude/settings.json` are preserved verbatim.
+
+**Top-up command.** Repos that ran `/scaffold-architecture` before the edit-time hook shipped can opt in retroactively via `/guardrails-add-edit-hook`, which is a thin wrapper over the merger CLI above. It does not re-scaffold the architecture.
+
+**Latency caveat.** The hook currently adds ~1.2s to every `Edit|Write|MultiEdit` on a representative Next.js repo, which exceeds the 300ms target. Q3 in `universal-guard-rails` therefore **defaults to "no"** until backlog item `DGEN-T-0055` (an `eslint_d`-style mitigation) lands.
+
+**Disable mechanism.** To globally disable hooks once installed, set `"disableAllHooks": true` in `.claude/settings.json` (project), `~/.claude/settings.json` (user), or `.claude/settings.local.json` (local-only). Managed-policy hooks are not affected by user/project/local `disableAllHooks` — see Claude Code hooks documentation for the current authoritative behavior.
+
 ## Idempotent re-runs
 
 After every non-dry-run apply, `bin/dev-genie-init.mjs` writes `.dev-genie/init.last-run.json` via `dev-genie/lib/plan-store.js`:

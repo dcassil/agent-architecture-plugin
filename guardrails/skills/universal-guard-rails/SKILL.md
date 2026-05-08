@@ -27,6 +27,12 @@ If **yes**, apply [Setup A](#setup-a--fail-fast-feedback-jsts).
 
 If **yes**, apply [Setup B](#setup-b--agent-guardrail-jsts).
 
+### Q3 — Edit-time lint feedback for AI agents
+
+> "Want me to install a Claude Code `PostToolUse` hook that runs `eslint --max-warnings=0` on every file an agent writes? This is the inner loop — agents see lint failures the moment they happen, before they pile up across multiple files."
+
+Default to **no** if the user does not answer explicitly. If **yes**, apply [Setup C](#setup-c--edit-time-lint-hook-jsts).
+
 ## Setup A — Fail-fast feedback (JS/TS)
 
 ### 1. `package.json` scripts
@@ -126,9 +132,39 @@ Reporting an error to the user and asking how to proceed is always
 acceptable. Silently relaxing the rule is not.
 ```
 
+## Setup C — Edit-time lint hook (JS/TS)
+
+Wires a Claude Code `PostToolUse` hook so `eslint --max-warnings=0` runs against any file an agent writes via `Edit`, `Write`, or `MultiEdit`. Failures hard-block the agent's turn at the moment the bad edit happens.
+
+### 1. Copy the hook script into the target repo
+
+Copy `guardrails/scripts/lint-edited-file.sh` from this plugin into the target repo at the same relative path: `<target>/guardrails/scripts/lint-edited-file.sh`. Create the `guardrails/scripts/` directory if it does not exist, and set the executable bit (`chmod 0755`).
+
+If the file already exists at the target path with identical contents, leave it alone — this step is idempotent.
+
+### 2. Merge the hook entry into `.claude/settings.json`
+
+Run the settings merger CLI from this plugin against the target repo:
+
+```bash
+node dev-genie/lib/claude-settings-merger.mjs --repo <target>
+```
+
+This invokes `mergeEditLintHook` from `dev-genie/lib/claude-settings-merger.mjs`, which:
+
+- Creates `<target>/.claude/settings.json` if absent.
+- Appends a `PostToolUse` matcher for `Edit|Write|MultiEdit` that runs `guardrails/scripts/lint-edited-file.sh`.
+- Is idempotent — re-running does not duplicate the hook entry.
+
+### Notes
+
+- The hook gracefully no-ops in repos that do not yet have `node_modules/.bin/eslint` installed, so bootstrap order is not fragile.
+- Non-JS/TS file extensions are skipped inside the script.
+- To disable temporarily, use the harness's hook-disable mechanism (e.g. `CLAUDE_HOOKS_DISABLE=1`) rather than editing the script.
+
 ## Verification
 
-After applying either setup, run a smoke check:
+After applying any setup, run a smoke check:
 
 ```bash
 npm run verify          # should pass on a clean tree
