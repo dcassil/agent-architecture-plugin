@@ -161,6 +161,7 @@ This invokes `mergeEditLintHook` from `dev-genie/lib/claude-settings-merger.mjs`
 - The hook gracefully no-ops in repos that do not yet have `node_modules/.bin/eslint` installed, so bootstrap order is not fragile.
 - Non-JS/TS file extensions are skipped inside the script.
 - To disable temporarily, use the harness's hook-disable mechanism (e.g. `CLAUDE_HOOKS_DISABLE=1`) rather than editing the script.
+- **Latency**: cold-start ESLint can run ~1s+ per edit. The hook prefers `node_modules/.bin/eslint_d` (a long-lived daemon, ~50–150ms per invocation) when present, falling back to plain `eslint` with `--cache`. To get the fast path, add `eslint_d` as a devDependency in the target repo (`npm i -D eslint_d`) — no global install or daemon-management is required, since `eslint_d` self-spawns on first call and reuses the running process for subsequent edits.
 
 ## Verification
 
