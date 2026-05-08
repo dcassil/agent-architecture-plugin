@@ -176,3 +176,89 @@ test('installPreCommitHooks: rejects bad input', async () => {
   await assert.rejects(() => installPreCommitHooks(dir, { system: 'unknown', commands: ['x'] }));
   await assert.rejects(() => installPreCommitHooks(dir, { commands: ['x'] }));
 });
+
+// DGEN-T-0042: simple-git-hooks + lint-staged install path
+
+test('install simple-git-hooks: writes package.json[simple-git-hooks].pre-commit, idempotent', async () => {
+  const dir = await mkTmp();
+  await fs.writeFile(path.join(dir, 'package.json'), JSON.stringify({ name: 'x' }, null, 2) + '\n');
+  const r1 = await installPreCommitHooks(dir, {
+    system: 'simple-git-hooks',
+    commands: ['npm run lint', 'npm run typecheck'],
+  });
+  assert.equal(r1.changed, true);
+  const pkg1 = JSON.parse(await fs.readFile(path.join(dir, 'package.json'), 'utf8'));
+  assert.equal(pkg1['simple-git-hooks']['pre-commit'], 'npm run lint && npm run typecheck');
+
+  const r2 = await installPreCommitHooks(dir, {
+    system: 'simple-git-hooks',
+    commands: ['npm run lint', 'npm run typecheck'],
+  });
+  assert.equal(r2.changed, false);
+});
+
+test('install lint-staged: writes default glob mapping, idempotent', async () => {
+  const dir = await mkTmp();
+  await fs.writeFile(path.join(dir, 'package.json'), JSON.stringify({ name: 'x' }, null, 2) + '\n');
+  const r1 = await installPreCommitHooks(dir, {
+    system: 'lint-staged',
+    commands: ['eslint --fix'],
+  });
+  assert.equal(r1.changed, true);
+  const pkg = JSON.parse(await fs.readFile(path.join(dir, 'package.json'), 'utf8'));
+  assert.equal(pkg['lint-staged']['*.{ts,tsx,js,jsx,mjs,cjs}'], 'eslint --fix');
+
+  const r2 = await installPreCommitHooks(dir, {
+    system: 'lint-staged',
+    commands: ['eslint --fix'],
+  });
+  assert.equal(r2.changed, false);
+});
+
+test('install simple-git-hooks + lint-staged: configures both halves, idempotent', async () => {
+  const dir = await mkTmp();
+  await fs.writeFile(path.join(dir, 'package.json'), JSON.stringify({ name: 'x' }, null, 2) + '\n');
+
+  const r1 = await installPreCommitHooks(dir, {
+    system: 'simple-git-hooks + lint-staged',
+    commands: ['npm run lint', 'npm run typecheck'],
+  });
+  assert.equal(r1.changed, true);
+
+  const pkg = JSON.parse(await fs.readFile(path.join(dir, 'package.json'), 'utf8'));
+  assert.ok(pkg['simple-git-hooks'], 'simple-git-hooks block written');
+  assert.match(pkg['simple-git-hooks']['pre-commit'], /npx lint-staged/);
+  assert.match(pkg['simple-git-hooks']['pre-commit'], /npm run typecheck/);
+  assert.ok(pkg['lint-staged'], 'lint-staged block written');
+  assert.equal(pkg['lint-staged']['*.{ts,tsx,js,jsx,mjs,cjs}'], 'npm run lint');
+
+  const r2 = await installPreCommitHooks(dir, {
+    system: 'simple-git-hooks + lint-staged',
+    commands: ['npm run lint', 'npm run typecheck'],
+  });
+  assert.equal(r2.changed, false);
+});
+
+test('install simple-git-hooks: respects existing user config without overwrite', async () => {
+  const dir = await mkTmp();
+  await fs.writeFile(
+    path.join(dir, 'package.json'),
+    JSON.stringify({ name: 'x', 'simple-git-hooks': { 'pre-commit': 'echo user-cmd' } }, null, 2) + '\n',
+  );
+  const r = await installPreCommitHooks(dir, {
+    system: 'simple-git-hooks',
+    commands: ['npm run lint'],
+  });
+  assert.equal(r.changed, false);
+  const pkg = JSON.parse(await fs.readFile(path.join(dir, 'package.json'), 'utf8'));
+  assert.equal(pkg['simple-git-hooks']['pre-commit'], 'echo user-cmd');
+
+  const r2 = await installPreCommitHooks(dir, {
+    system: 'simple-git-hooks',
+    commands: ['npm run lint'],
+    overwrite: true,
+  });
+  assert.equal(r2.changed, true);
+  const pkg2 = JSON.parse(await fs.readFile(path.join(dir, 'package.json'), 'utf8'));
+  assert.equal(pkg2['simple-git-hooks']['pre-commit'], 'npm run lint');
+});

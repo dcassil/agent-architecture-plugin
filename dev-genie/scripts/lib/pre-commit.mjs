@@ -227,14 +227,23 @@ function classifyPreCommitFramework(raw) {
 
 // ---------- install ----------
 
-export async function installPreCommitHooks(repoPath, { system, commands }) {
+export async function installPreCommitHooks(repoPath, { system, commands, overwrite = false }) {
   if (!system) throw new Error('installPreCommitHooks: `system` is required');
   if (!Array.isArray(commands) || commands.length === 0) {
     throw new Error('installPreCommitHooks: `commands` must be a non-empty array');
   }
   const cmds = commands.map((c) => String(c).trim()).filter(Boolean);
 
-  switch (system) {
+  // Compound systems: split on '+' and run each half.
+  const parts = String(system)
+    .split('+')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (parts.length > 1) {
+    return installCompound(repoPath, parts, cmds, { overwrite });
+  }
+
+  switch (parts[0]) {
     case 'husky':
       return installHusky(repoPath, cmds);
     case 'lefthook':
@@ -243,9 +252,147 @@ export async function installPreCommitHooks(repoPath, { system, commands }) {
       return installPreCommitFramework(repoPath, cmds);
     case 'pre-commit-raw':
       return installRawHook(repoPath, cmds);
+    case 'simple-git-hooks':
+      return installSimpleGitHooks(repoPath, cmds, { overwrite });
+    case 'lint-staged':
+      return installLintStaged(repoPath, cmds, { overwrite });
     default:
       throw new Error(`installPreCommitHooks: unknown system "${system}"`);
   }
+}
+
+// ---------- compound systems (e.g. simple-git-hooks + lint-staged) ----------
+
+async function installCompound(repoPath, parts, cmds, { overwrite }) {
+  const set = new Set(parts);
+  const hasLintStaged = set.has('lint-staged');
+  const hasSGH = set.has('simple-git-hooks');
+
+  // Treat any command that mentions eslint/lint as a lint-staged candidate.
+  const isLintCmd = (c) => /\beslint\b|\blint\b/i.test(c);
+  const lintCmds = cmds.filter(isLintCmd);
+  const otherCmds = cmds.filter((c) => !isLintCmd(c));
+
+  const files = [];
+  let changed = false;
+
+  if (hasLintStaged && lintCmds.length > 0) {
+    const r = await installLintStaged(repoPath, lintCmds, { overwrite });
+    files.push(...r.files);
+    changed = changed || r.changed;
+  }
+
+  if (hasSGH) {
+    // Hook command chains lint-staged (if requested) + remaining commands.
+    const hookParts = [];
+    if (hasLintStaged && lintCmds.length > 0) hookParts.push('npx lint-staged');
+    hookParts.push(...otherCmds);
+    const hookCmds = hookParts.length > 0 ? hookParts : cmds;
+    const r = await installSimpleGitHooks(repoPath, hookCmds, { overwrite });
+    files.push(...r.files);
+    changed = changed || r.changed;
+  }
+
+  return {
+    changed,
+    system: parts.join(' + '),
+    files,
+    summary: files.map((f) => `${changed ? 'wrote' : 'no change'}: ${f.path}`).join('\n'),
+  };
+}
+
+async function installSimpleGitHooks(repoPath, cmds, { overwrite = false } = {}) {
+  const file = path.join(repoPath, 'package.json');
+  if (!existsSync(file)) {
+    return {
+      changed: false,
+      system: 'simple-git-hooks',
+      files: [],
+      summary: `simple-git-hooks: package.json not found at ${file}; skipping`,
+    };
+  }
+  const before = await fs.readFile(file, 'utf8');
+  const indent = detectJsonIndent(before);
+  const trailingNL = before.endsWith('\n') ? '\n' : '';
+  const pkg = JSON.parse(before);
+  const desired = cmds.join(' && ');
+
+  const sgh = (pkg['simple-git-hooks'] && typeof pkg['simple-git-hooks'] === 'object')
+    ? { ...pkg['simple-git-hooks'] }
+    : {};
+  const current = sgh['pre-commit'];
+  if (current && current !== desired && !overwrite) {
+    return {
+      changed: false,
+      system: 'simple-git-hooks',
+      files: [{ path: file, before, after: before }],
+      summary: `simple-git-hooks: package.json#simple-git-hooks.pre-commit already set to a different value; pass overwrite:true to replace`,
+    };
+  }
+  sgh['pre-commit'] = desired;
+  pkg['simple-git-hooks'] = sgh;
+  const after = JSON.stringify(pkg, null, indent) + trailingNL;
+  return writeJsonIfChanged(file, before, after, 'simple-git-hooks');
+}
+
+async function installLintStaged(repoPath, cmds, { overwrite = false } = {}) {
+  const file = path.join(repoPath, 'package.json');
+  if (!existsSync(file)) {
+    return {
+      changed: false,
+      system: 'lint-staged',
+      files: [],
+      summary: `lint-staged: package.json not found at ${file}; skipping`,
+    };
+  }
+  const before = await fs.readFile(file, 'utf8');
+  const indent = detectJsonIndent(before);
+  const trailingNL = before.endsWith('\n') ? '\n' : '';
+  const pkg = JSON.parse(before);
+
+  const ls = (pkg['lint-staged'] && typeof pkg['lint-staged'] === 'object')
+    ? { ...pkg['lint-staged'] }
+    : {};
+  const glob = '*.{ts,tsx,js,jsx,mjs,cjs}';
+  const desired = cmds.length === 1 ? cmds[0] : cmds.slice();
+  const current = ls[glob];
+
+  const same = JSON.stringify(current) === JSON.stringify(desired);
+  if (current !== undefined && !same && !overwrite) {
+    return {
+      changed: false,
+      system: 'lint-staged',
+      files: [{ path: file, before, after: before }],
+      summary: `lint-staged: package.json#lint-staged["${glob}"] already set; pass overwrite:true to replace`,
+    };
+  }
+  ls[glob] = desired;
+  pkg['lint-staged'] = ls;
+  const after = JSON.stringify(pkg, null, indent) + trailingNL;
+  return writeJsonIfChanged(file, before, after, 'lint-staged');
+}
+
+function detectJsonIndent(raw) {
+  const m = raw.match(/^\{\s*\n([ \t]+)/);
+  return m ? m[1] : '  ';
+}
+
+async function writeJsonIfChanged(file, before, after, system) {
+  if (before === after) {
+    return {
+      changed: false,
+      system,
+      files: [{ path: file, before, after }],
+      summary: `${system}: ${file} already up to date`,
+    };
+  }
+  await fs.writeFile(file, after, 'utf8');
+  return {
+    changed: true,
+    system,
+    files: [{ path: file, before, after }],
+    summary: `${system}: updated ${file}`,
+  };
 }
 
 function buildShellBlock(cmds) {
