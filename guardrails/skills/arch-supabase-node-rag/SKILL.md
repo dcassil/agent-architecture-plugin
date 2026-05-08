@@ -54,7 +54,7 @@ vitest             # lib/server/* unit tests (guardrails, fallback, sentinel par
 
 ```bash
 npm i next react react-dom @supabase/supabase-js zod server-only
-npm i -D eslint @eslint/js typescript-eslint globals vitest supabase
+npm i -D eslint eslint_d @eslint/js typescript-eslint globals vitest supabase
 ```
 
 LLM/embedding/email/analytics providers are deliberately NOT prescribed — pick per project, isolate behind one `lib/server/*` module.

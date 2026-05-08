@@ -41,7 +41,7 @@ Adjust import-boundary path globs in `eslint.config.mjs` if your `src/` layout d
 ## Peer deps
 
 ```bash
-npm i -D eslint @eslint/js typescript-eslint globals
+npm i -D eslint eslint_d @eslint/js typescript-eslint globals
 ```
 
 ## When NOT to use

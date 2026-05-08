@@ -131,7 +131,7 @@ node dev-genie/lib/claude-settings-merger.mjs --repo <target>
 
 **Top-up command.** Repos that ran `/scaffold-architecture` before the edit-time hook shipped can opt in retroactively via `/guardrails-add-edit-hook`, which is a thin wrapper over the merger CLI above. It does not re-scaffold the architecture.
 
-**Latency caveat.** The hook currently adds ~1.2s to every `Edit|Write|MultiEdit` on a representative Next.js repo, which exceeds the 300ms target. Q3 in `universal-guard-rails` therefore **defaults to "no"** until backlog item `DGEN-T-0055` (an `eslint_d`-style mitigation) lands.
+**Latency.** The hook prefers `eslint_d` (~50–150ms warm) over cold-start `eslint` (~1.2s). Architecture skills install `eslint_d` as a devDependency, so scaffolded repos hit the fast path and Q3 in `universal-guard-rails` **defaults to "yes"**.
 
 **Disable mechanism.** To globally disable hooks once installed, set `"disableAllHooks": true` in `.claude/settings.json` (project), `~/.claude/settings.json` (user), or `.claude/settings.local.json` (local-only). Managed-policy hooks are not affected by user/project/local `disableAllHooks` — see Claude Code hooks documentation for the current authoritative behavior.
 

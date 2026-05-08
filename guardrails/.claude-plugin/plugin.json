@@ -1,6 +1,6 @@
 {
   "name": "guardrails",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Guardrails plugin (dev-genie ecosystem): architecture pattern catalog, /scaffold-architecture command, and per-stack ESLint/TypeScript guard-rail skills for Next.js, Node API, Supabase, and Supabase RAG. Scope is architecture + lint/type rules only — does not own static-analysis/scoring (audit) or umbrella bootstrap (dev-genie).",
   "author": {
     "name": "Daniel Cassil",

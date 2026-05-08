@@ -41,7 +41,7 @@ Then adjust `paths`, `ignores`, and the import-boundary patterns in `eslint.conf
 ## Peer deps
 
 ```bash
-npm i -D eslint @eslint/js typescript-eslint globals \
+npm i -D eslint eslint_d @eslint/js typescript-eslint globals \
   eslint-plugin-react eslint-plugin-react-hooks \
   @next/eslint-plugin-next
 ```

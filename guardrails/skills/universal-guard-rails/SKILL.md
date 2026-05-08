@@ -31,7 +31,7 @@ If **yes**, apply [Setup B](#setup-b--agent-guardrail-jsts).
 
 > "Want me to install a Claude Code `PostToolUse` hook that runs `eslint --max-warnings=0` on every file an agent writes? This is the inner loop — agents see lint failures the moment they happen, before they pile up across multiple files."
 
-Default to **no** if the user does not answer explicitly. If **yes**, apply [Setup C](#setup-c--edit-time-lint-hook-jsts).
+Default to **yes** if the user does not answer explicitly. The four architecture skills install `eslint_d` as a devDependency, so the hook runs through the long-lived daemon (~50–150ms per edit) rather than cold-start `eslint` (~1.2s). Apply [Setup C](#setup-c--edit-time-lint-hook-jsts) unless the user opts out.
 
 ## Setup A — Fail-fast feedback (JS/TS)
 
@@ -161,7 +161,7 @@ This invokes `mergeEditLintHook` from `dev-genie/lib/claude-settings-merger.mjs`
 - The hook gracefully no-ops in repos that do not yet have `node_modules/.bin/eslint` installed, so bootstrap order is not fragile.
 - Non-JS/TS file extensions are skipped inside the script.
 - To disable temporarily, use the harness's hook-disable mechanism (e.g. `CLAUDE_HOOKS_DISABLE=1`) rather than editing the script.
-- **Latency**: cold-start ESLint can run ~1s+ per edit. The hook prefers `node_modules/.bin/eslint_d` (a long-lived daemon, ~50–150ms per invocation) when present, falling back to plain `eslint` with `--cache`. To get the fast path, add `eslint_d` as a devDependency in the target repo (`npm i -D eslint_d`) — no global install or daemon-management is required, since `eslint_d` self-spawns on first call and reuses the running process for subsequent edits.
+- **Latency**: the hook prefers `node_modules/.bin/eslint_d` (a long-lived daemon, ~50–150ms per invocation), falling back to plain `eslint` with `--cache` (~1.2s cold). The four architecture skills (`arch-node-api`, `arch-next-vercel`, `arch-supabase-api`, `arch-supabase-node-rag`) include `eslint_d` in their `npm i -D` line, so scaffolded repos get the fast path automatically. `eslint_d` self-spawns on first call and reuses the running process for subsequent edits — no global install or daemon-management.
 
 ## Verification
 

@@ -193,3 +193,14 @@ DGEN-T-0049 measured `guardrails/scripts/lint-edited-file.sh` against `BeeLine-F
 **Test run:** `node --test dev-genie/lib/*.test.mjs dev-genie/scripts/lib/*.test.mjs guardrails/scripts/*.test.mjs` → 70/70 pass.
 
 **Follow-up needed:** wall-time re-measurement on BeeLine-Frontend (or comparable Next.js repo) with `eslint_d` installed; once confirmed <300ms p95, flip Q3 default to "yes" in the universal-guard-rails SKILL.
+
+### 2026-05-08 — Bundle eslint_d into architecture installs and flip Q3 default to "yes"
+
+**Decision:** Reverse the earlier "no scaffold-level auto-add" stance. The user wants the plugin to ship a working fast path out of the box, so `eslint_d` is now a default devDependency in every JS/TS architecture.
+
+**Changes:**
+- `guardrails/skills/arch-node-api/SKILL.md`, `arch-next-vercel/SKILL.md`, `arch-supabase-api/SKILL.md`, `arch-supabase-node-rag/SKILL.md`: added `eslint_d` to the `npm i -D` peer-deps line.
+- `guardrails/skills/universal-guard-rails/SKILL.md`: Q3 now defaults to **yes**; Setup C latency note rewritten to reflect that scaffolded repos hit the daemon path automatically.
+- `dev-genie/RECONCILIATION.md`, `dev-genie/commands/dev-genie-init.md`, `dev-genie/skills/orchestration/SKILL.md`: latency caveats updated; Q3 default flipped to yes.
+
+**Outstanding:** the empirical p95<300ms measurement on a real Next.js repo still hasn't been re-run. Published `eslint_d` numbers (50–150ms warm) make this very likely to pass, but if it doesn't, fall back to opt-in via the same Q3 mechanism.

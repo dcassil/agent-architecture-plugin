@@ -39,7 +39,7 @@ You are running the dev-genie one-time bootstrap flow. dev-genie owns no scoring
 
 `/scaffold-architecture` ends in the `universal-guard-rails` skill, which now asks a third question (**Q3**) offering to install a Claude Code `PostToolUse` hook on `Edit|Write|MultiEdit` that runs `guardrails/scripts/lint-edited-file.sh` against each edited file. The merger (`dev-genie/lib/claude-settings-merger.mjs`) keys idempotency on the `command` value `guardrails/scripts/lint-edited-file.sh`.
 
-- **Default is "no"** for now: measured latency is ~1.2s per edit on a representative Next.js repo, exceeding the 300ms target. Mitigation (`eslint_d`-style daemon) is tracked under backlog item `DGEN-T-0055`.
+- **Default is "yes"**: architecture skills install `eslint_d` as a devDependency, so the hook runs through the warm daemon (~50–150ms per edit) instead of cold-start `eslint` (~1.2s).
 - For already-scaffolded repos that want to opt in later, point users at `/guardrails-add-edit-hook`.
 - To disable hooks once installed, set `"disableAllHooks": true` in `.claude/settings.json` (or `~/.claude/settings.json`); see Claude Code hooks documentation for the canonical, up-to-date disable mechanism.
 
