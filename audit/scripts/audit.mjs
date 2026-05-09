@@ -117,7 +117,9 @@ async function main() {
 
   let scanMetrics;
   try {
-    scanMetrics = await scan(repoRoot);
+    scanMetrics = await scan(repoRoot, {
+      srcGlobs: Array.isArray(config.srcGlobs) ? config.srcGlobs : undefined,
+    });
   } catch (e) {
     if (e.code === 'AUDIT_BIN_MISSING') err2(e.message);
     err2(`audit: scan failed: ${e.message}`);

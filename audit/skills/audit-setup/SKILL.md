@@ -50,12 +50,25 @@ If either is missing, surface the exact install command for the user's platform 
 
 ### 3. Create .audit/ and seed audit.config.json
 
-Create the `.audit/` directory in the repo root and write `audit.config.json`:
+Create the `.audit/` directory in the repo root and write `audit.config.json`.
+
+**Pick `srcGlobs` per architecture** — the audit MUST scan only the host repo's product code, not vendored tooling, build output, or fixtures. Detect the architecture (look for guardrails skill that was applied, or infer from layout) and use the matching globs:
+
+| Architecture                       | Recommended `srcGlobs`                              |
+|------------------------------------|-----------------------------------------------------|
+| `node-api`                         | `["src"]`                                           |
+| `react-next-vercel-webapp`         | `["app", "components", "lib"]` (drop any missing)   |
+| `supabase-api`                     | `["supabase/functions", "types"]`                   |
+| `supabase-node-rag`                | `["app", "lib", "types", "supabase/seed"]`          |
+| Unknown / other                    | `["src"]` if it exists, else best-guess source root |
+
+Drop any glob whose directory does not exist on disk. If none match, ask the user which folder holds product code rather than falling back to `.`.
 
 ```json
 {
   "regressionThreshold": 5,
   "requireImprovement": false,
+  "srcGlobs": ["src"],
   "baselines": {
     "cycles":        { "good": 0,    "bad": 0.10 },
     "depth":         { "good": 4,    "bad": 15   },
@@ -73,6 +86,8 @@ Create the `.audit/` directory in the repo root and write `audit.config.json`:
 ```
 
 These defaults are tuned for typical TypeScript / Node service repos. If the host repo is a monorepo with very different per-package shapes, the user can hand-tune them later — but DO NOT tune weights (those are hard-coded in the plugin so scores stay comparable across projects).
+
+`srcGlobs` is the per-repo scope knob. The scanner passes it to both `dependency-cruiser` and `scc`, so both architecture and LOC/complexity composites see the same files. If `srcGlobs` is omitted, the scanner falls back to whichever of `src/`, `lib/`, `app/` exist — adequate for a vanilla project, but be explicit for anything else.
 
 ### 4. Take the baseline scan
 

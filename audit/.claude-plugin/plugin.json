@@ -1,6 +1,6 @@
 {
   "name": "audit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Audit plugin (dev-genie ecosystem): composite quality scoring across ESLint, TypeScript, tests, and security checks, surfaced via /audit-init and /audit-run plus a pre-commit hook. Scope is static-analysis aggregation and gating only — does not own architecture/lint rules (guardrails) or umbrella bootstrap (dev-genie).",
   "author": {
     "name": "Daniel Cassil",

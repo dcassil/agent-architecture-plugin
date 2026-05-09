@@ -11,7 +11,13 @@ import { resolve } from 'node:path';
 
 const execFileP = promisify(execFile);
 
-const DEFAULT_SRC = ['src', 'lib', 'app', 'packages', 'audit', 'guardrails', 'dev-genie', 'scripts'];
+// Conservative default: app source roots only. Plugin/tooling dirs (audit/,
+// guardrails/, dev-genie/, scripts/) are intentionally excluded — they're
+// vendored infrastructure, not the host repo's product code, and including
+// them dilutes the composite scores. Configure `srcGlobs` in
+// .audit/audit.config.json to override per-architecture (e.g. ["app","lib"]
+// for Next.js, ["supabase/functions"] for Supabase Edge).
+const DEFAULT_SRC = ['src', 'lib', 'app'];
 
 /**
  * @param {string} repoRoot - absolute path to the host repo
@@ -39,7 +45,7 @@ export async function scan(repoRoot, opts = {}) {
   const t0 = Date.now();
   const [dc, sc] = await Promise.all([
     runDepcruise(depcruiseBin, root, srcGlobs, opts.timeoutMs ?? 120_000),
-    runScc(sccBin, root, opts.timeoutMs ?? 60_000),
+    runScc(sccBin, root, srcGlobs, opts.timeoutMs ?? 60_000),
   ]);
   const wallMs = Date.now() - t0;
 
@@ -108,11 +114,12 @@ async function runDepcruise(bin, cwd, globs, timeoutMs) {
   }
 }
 
-async function runScc(bin, cwd, timeoutMs) {
+async function runScc(bin, cwd, paths, timeoutMs) {
   // --by-file emits per-file entries (with `Complexity`) inside each language summary.
   // We need them so the reducer can compute avg/max cyclomatic complexity — scc's
   // language-level totals don't preserve the per-file distribution we need for max.
-  const args = ['--by-file', '--format', 'json', '.'];
+  // Scope scc to the same paths as depcruise so both metric sources see the same code.
+  const args = ['--by-file', '--format', 'json', ...(paths && paths.length ? paths : ['.'])];
   const { stdout } = await execFileP(bin, args, { cwd, timeout: timeoutMs, maxBuffer: 256 * 1024 * 1024 });
   try {
     return JSON.parse(stdout);
